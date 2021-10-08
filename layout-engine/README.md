@@ -3,6 +3,10 @@
 Input: design json
 Output: layout constraints
 
+## Scenario
+
+### Grouping / Positioning / Layouting a un layouted design based on flattened tokens.
+
 ## Supported tokens
 
 - scroll
