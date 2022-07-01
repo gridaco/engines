@@ -17,6 +17,8 @@ Nested layer elements
 - Style
 - Body
 - Parent
+- Depth
+- Export
 
 ### Sanitizer
 
@@ -116,3 +118,8 @@ properties: //
   properties: null
  -->
 ```
+
+## References
+
+- [Medium: How To Parse Typescript From Source](https://allenhwkim.medium.com/how-to-parse-typescript-from-source-643387971f4e)
+- [JS AST Parser for python (esprima)](https://github.com/Kronuz/esprima-python)

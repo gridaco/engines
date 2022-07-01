@@ -1,4 +1,4 @@
-unittest
+tqdm
 PyGithub
 requests
 bs4
