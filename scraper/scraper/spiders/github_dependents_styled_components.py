@@ -1,15 +1,19 @@
+#
+# How to use
+# scrapy crawl network/dependents -a repo=<org/repo> -o <out>.json
+#
+
 import scrapy
 
-repo = "styled-components/styled-components"
-url = 'https://github.com/{}/network/dependents'.format(repo)
+
+def url(repo): return 'https://github.com/{}/network/dependents'.format(repo)
 
 
 class GithubNetworkDependentsSpider(scrapy.Spider):
     name = "network/dependents"
 
     def start_requests(self):
-        print('url', url)
-        yield scrapy.Request(url=url, callback=self.parse)
+        yield scrapy.Request(url=url(repo=self.repo), callback=self.parse)
 
     def parse(self, response):
 
