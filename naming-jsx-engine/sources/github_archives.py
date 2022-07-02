@@ -5,9 +5,10 @@ from tqdm import tqdm
 import pathlib
 import os
 from os import path
-import zipfile
 import glob
-# from sanitizers import remove_redunant_files
+import zipfile
+# from ..sanitizers import remove_redunant_files
+
 
 KB1 = 1024  # 1 Kibibyte
 
@@ -26,7 +27,7 @@ def download_zip(repo, file):
         total_size_in_bytes = int(response.headers.get('content-length', 0))
 
         progress_bar = tqdm(total=total_size_in_bytes,
-                            unit='iB', unit_scale=True)
+                            unit='iB', unit_scale=True, position=1)
 
         with open(file, 'wb') as file:
             for data in response.iter_content(KB1):
@@ -35,6 +36,8 @@ def download_zip(repo, file):
         progress_bar.close()
         return True
     except GithubException:
+        return False
+    except KeyError:
         return False
 
 
@@ -56,7 +59,7 @@ def unzip_file(file, dir, name=None, remove=True, clean=True):
         if remove:
             os.remove(file)
         # if clean:
-        #     remove_redunant_files(final_path)
+            # remove_redunant_files(final_path)
     except zipfile.BadZipFile:
         os.remove(file)
         return False
@@ -68,7 +71,8 @@ if __name__ == '__main__':
     repo_set = [x['id']
                 for x in json.load(open(path.join(DIR, '../../scraper/styled-components.json')))][:total]
     total = len(repo_set)
-    progress_bar = tqdm(total=total)
+
+    progress_bar = tqdm(total=total, position=0, leave=True)
 
     for repo in repo_set:
         org = repo.split('/')[0]

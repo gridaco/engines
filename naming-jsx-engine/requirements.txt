@@ -2,3 +2,4 @@ tqdm
 PyGithub
 requests
 bs4
+python-dotenv

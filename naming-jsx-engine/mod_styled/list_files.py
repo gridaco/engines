@@ -14,7 +14,7 @@ def list_styled_components_files(project_path):
 
     files = glob.glob(
         project_path + '**/*.{}'.format(''.join(EXTS)), recursive=True)
-
+    print(len(files))
     # find files uses styled-components by searching for the import statement
     # -> import styled from "styled-components";
     styled_components_files = []
