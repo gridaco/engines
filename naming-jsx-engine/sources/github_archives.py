@@ -7,15 +7,13 @@ import os
 from os import path
 import glob
 import zipfile
+from settings import ARCHIVES_DIR
 # from ..sanitizers import remove_redunant_files
 
 
 KB1 = 1024  # 1 Kibibyte
 
 gh = Github(os.environ['GITHUB_ACCESS_TOKEN'])
-
-DIR = pathlib.Path(__file__).parent.resolve()
-archives_dir = path.join(pathlib.Path(__file__).parent.resolve(), "archives")
 
 
 def download_zip(repo, file):
@@ -66,7 +64,7 @@ def unzip_file(file, dir, name=None, remove=True, clean=True):
 
 
 if __name__ == '__main__':
-
+    DIR = pathlib.Path(__file__).parent.resolve()
     total = 10000
     repo_set = [x['id']
                 for x in json.load(open(path.join(DIR, '../../scraper/styled-components.json')))][:total]
@@ -77,9 +75,9 @@ if __name__ == '__main__':
     for repo in repo_set:
         org = repo.split('/')[0]
         repo_name = repo.split('/')[1]
-        org_dir = path.join(archives_dir, org)
+        org_dir = path.join(ARCHIVES_DIR, org)
         repo_dir = path.join(org_dir, repo_name)
-        file = path.join(archives_dir, f'{org}/{repo_name}.zip')
+        file = path.join(ARCHIVES_DIR, f'{org}/{repo_name}.zip')
 
         # create directory if it doesn't exist
         try:

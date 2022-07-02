@@ -1,5 +1,6 @@
 import os
 import json
+from sources import ARCHIVES_DIR
 
 
 def locate_projects(repo_path):
@@ -32,14 +33,10 @@ def locate_projects(repo_path):
 
 
 if __name__ == '__main__':
-    # archives directory
-    archives_dir = os.path.join(os.path.dirname(
-        __file__), '..', 'sources', 'archives')
-
     all = []
     # loop through all directory under archives directory
-    for d in os.listdir(archives_dir):
-        path = os.path.join(archives_dir, d)
+    for d in os.listdir(ARCHIVES_DIR):
+        path = os.path.join(ARCHIVES_DIR, d)
         if os.path.isdir(path):
             # get all projects in the directory
             projects = locate_projects(path)

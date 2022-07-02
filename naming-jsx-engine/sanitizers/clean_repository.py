@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+from sources import ARCHIVES_DIR
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -66,8 +67,8 @@ def remove_redunant_files(path, recursive=True):
 
 if __name__ == '__main__':
     # loop through all directories under the archives directory
-    for orgs in os.listdir(os.path.join(DIR, '../sources/archives')):
-        org_path = os.path.join(DIR, '../sources/archives', orgs)
+    for orgs in os.listdir(ARCHIVES_DIR):
+        org_path = os.path.join(ARCHIVES_DIR, orgs)
         if os.path.isdir(org_path):
             # list repo dirs under the orgs directory
             for repo in os.listdir(org_path):
