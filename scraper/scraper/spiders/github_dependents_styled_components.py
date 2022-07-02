@@ -6,14 +6,18 @@
 import scrapy
 
 
-def url(repo): return 'https://github.com/{}/network/dependents'.format(repo)
+def url(repo, dependents_after=None):
+    if dependents_after is not None:
+        return f'https://github.com/{repo}/network/dependents?dependents_after={dependents_after}'
+    else:
+        return f'https://github.com/{repo}/network/dependents'
 
 
 class GithubNetworkDependentsSpider(scrapy.Spider):
     name = "network/dependents"
 
     def start_requests(self):
-        yield scrapy.Request(url=url(repo=self.repo), callback=self.parse)
+        yield scrapy.Request(url=url(repo=self.repo, dependents_after=self.dependents_after), callback=self.parse)
 
     def parse(self, response):
 
