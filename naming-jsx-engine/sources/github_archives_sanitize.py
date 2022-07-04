@@ -1,12 +1,12 @@
 import glob
 import os
 import shutil
-from sources import ARCHIVES_DIR
+from settings import ARCHIVES_DIR
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def remove_redunant_files(path, recursive=True):
+def remove_redunant_files(path, recursive=True, log=False):
     """
     Remove redunant files from the repository.
     print the removed files.
@@ -62,7 +62,8 @@ def remove_redunant_files(path, recursive=True):
                     os.remove(file)
                 except FileNotFoundError:
                     pass
-            print(f'Removed {file}')
+            if log:
+                print(f'Removed {file}')
 
 
 if __name__ == '__main__':
@@ -75,4 +76,4 @@ if __name__ == '__main__':
                 # is dir?
                 path = os.path.join(org_path, repo)
                 if os.path.isdir(path):
-                    remove_redunant_files(path, recursive=True)
+                    remove_redunant_files(path, recursive=True, log=True)
