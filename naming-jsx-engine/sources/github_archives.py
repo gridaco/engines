@@ -25,7 +25,7 @@ def download_zip(repo, file):
         total_size_in_bytes = int(response.headers.get('content-length', 0))
 
         progress_bar = tqdm(total=total_size_in_bytes,
-                            unit='iB', unit_scale=True, position=1)
+                            unit='iB', unit_scale=True, position=0)
 
         with open(file, 'wb') as file:
             for data in response.iter_content(KB1):
@@ -36,6 +36,8 @@ def download_zip(repo, file):
     except GithubException:
         return False
     except KeyError:
+        return False
+    except Exception:
         return False
 
 
@@ -64,13 +66,17 @@ def unzip_file(file, dir, name=None, remove=True, clean=True):
 
 
 if __name__ == '__main__':
+    total = 10000  # set None for all
     DIR = pathlib.Path(__file__).parent.resolve()
-    total = 10000
+
     repo_set = [x['id']
-                for x in json.load(open(path.join(DIR, '../../scraper/styled-components.json')))][:total]
+                for x in json.load(open(path.join(DIR, '../../scraper/styled-components.json')))]
+
+    if total is not None:
+        repo_set = repo_set[:total]
     total = len(repo_set)
 
-    progress_bar = tqdm(total=total, position=0, leave=True)
+    progress_bar = tqdm(total=total, position=1, leave=True)
 
     for repo in repo_set:
         org = repo.split('/')[0]
@@ -86,17 +92,17 @@ if __name__ == '__main__':
             pass
 
         if path.exists(repo_dir):
-            print(f'{repo} already archived. skipping..')
+            tqdm.write(f'{repo} already archived. skipping..')
         elif path.exists(org_dir) and len(glob.glob(path.join(org_dir, f'{repo_name}.zip'))) > 0:
             # if directory exists, check if any *.zip file is present under that directory. (with glob)
             unzip_file(file, org_dir, name=repo_name, remove=False)
-            print(f'{repo} archived (unzip only)')
+            tqdm.write(f'{repo} archived (unzip only)')
         else:
             dl = download_zip(repo, file)
             if dl:
                 unzip_file(file, org_dir, name=repo_name, remove=False)
-                print(f'{repo} archived')
+                tqdm.write(f'{repo} archived')
             else:
-                print(f'{repo} something went wrong. not found')
+                tqdm.write(f'{repo} something went wrong. not found')
 
         progress_bar.update(1)
