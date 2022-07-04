@@ -1,6 +1,6 @@
 #
 # How to use
-# scrapy crawl network/dependents -a repo=<org/repo> -o <out>.json
+# scrapy crawl github.com/network/dependents -a repo=<org/repo> -a dependents_after=<id> -o <out>.json
 #
 
 import scrapy
@@ -14,7 +14,7 @@ def url(repo, dependents_after=None):
 
 
 class GithubNetworkDependentsSpider(scrapy.Spider):
-    name = "network/dependents"
+    name = "github.com/network/dependents"
 
     def start_requests(self):
         yield scrapy.Request(url=url(repo=self.repo, dependents_after=self.dependents_after), callback=self.parse)
