@@ -160,8 +160,8 @@ def proc(repo, progress_bar, indexes, extract):
                 # tqdm.write(f'{repo} archived')
         else:
             add_error(repo)
-            tqdm.write(
-                f'not found: something went wrong. - https://github.com/{repo}')
+            # tqdm.write(
+            #     f'not found: something went wrong. - https://github.com/{repo}')
 
     progress_bar.update(1)
 
