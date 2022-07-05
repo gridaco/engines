@@ -105,4 +105,10 @@ if __name__ == '__main__':
                 path = os.path.join(org_path, repo)
                 if os.path.isdir(path):
                     remove_redunant_files(path, recursive=True, log=True)
+
+                    size = os.path.getsize(path)
+                    # if size still bigger than 50mib, log it.
+                    mib = size / 1024 / 1024
+                    if mib > 50:
+                        print(f'large repo warning: {mib} mib for - {path}')
                     bar.update(1)
