@@ -4,3 +4,4 @@ requests
 bs4
 python-dotenv
 click
+python-magic

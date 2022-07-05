@@ -1,5 +1,6 @@
 import glob
 import os
+from tqdm import tqdm
 import shutil
 from settings import ARCHIVES_DIR
 
@@ -52,6 +53,10 @@ def remove_redunant_files(path, recursive=True, log=False):
         ".vscode",
         '.DS_Store',
     ]
+
+    if log:
+        tqdm.write(f'Removing redunant files from {path}')
+
     for pattern in remove:
         for file in glob.glob(os.path.join(path, '**/' + pattern), recursive=recursive):
             # if directory, remove it
@@ -63,12 +68,14 @@ def remove_redunant_files(path, recursive=True, log=False):
                 except FileNotFoundError:
                     pass
             if log:
-                print(f'Removed {file}')
+                tqdm.write(f'rm - {file}')
 
 
 if __name__ == '__main__':
+    dirs = os.listdir(ARCHIVES_DIR)
+    bar = tqdm(total=len(dirs), position=0)
     # loop through all directories under the archives directory
-    for orgs in os.listdir(ARCHIVES_DIR):
+    for orgs in dirs:
         org_path = os.path.join(ARCHIVES_DIR, orgs)
         if os.path.isdir(org_path):
             # list repo dirs under the orgs directory
@@ -77,3 +84,4 @@ if __name__ == '__main__':
                 path = os.path.join(org_path, repo)
                 if os.path.isdir(path):
                     remove_redunant_files(path, recursive=True, log=True)
+                    bar.update(1)

@@ -1,4 +1,5 @@
 import click
+import magic
 import json
 from github import Github, GithubException
 from multiprocessing import cpu_count
@@ -11,6 +12,7 @@ import os
 from os import path
 import glob
 import zipfile
+import tarfile
 from settings import ARCHIVES_DIR
 from github_archives_sanitize import remove_redunant_files
 from github_archives_index import read_index, add_error, index
@@ -82,35 +84,54 @@ def download_zip(repo, use_api=True, max_mb=30):
     except KeyError:
         return False
     except Exception as e:
-        print(e)
         return False
 
 
 def unzip_file(file, dir, name=None, remove=False, clean=True):
     final_path = None
-    try:
-        with zipfile.ZipFile(file, 'r') as zip_ref:
-            zipinfos = zip_ref.infolist()
-            zipinfo = zipinfos[0]
-            old_path = path.join(dir, zipinfo.filename)
-            final_path = old_path
-            zip_ref.extractall(dir)
-            # rename the extracted directory name if name is given
-            if name:
-                new_path = path.join(dir, name)
-                final_path = new_path
-                os.rename(old_path, new_path)
 
-        if remove:
+    mime = magic.Magic(mime=True)
+    type = mime.from_file(file)
+
+    if type == 'application/gzip':
+        # tar.gz if via wget
+        file = tarfile.open(file, 'r:gz')
+        old_path = path.join(dir, os.path.commonprefix(file.getnames()))
+        final_path = old_path
+        file.extractall(dir)
+        file.close()
+        if name is not None:
+            new_path = path.join(dir, name)
+            final_path = new_path
+            os.rename(old_path, new_path)
+
+    # zip if via api
+    if type == 'application/zip':
+        try:
+            with zipfile.ZipFile(file, 'r') as zip_ref:
+                zipinfos = zip_ref.infolist()
+                zipinfo = zipinfos[0]
+                old_path = path.join(dir, zipinfo.filename)
+                final_path = old_path
+                zip_ref.extractall(dir)
+                # rename the extracted directory name if name is given
+                if name is not None:
+                    new_path = path.join(dir, name)
+                    final_path = new_path
+                    os.rename(old_path, new_path)
+
+        except zipfile.BadZipFile as e:
             os.remove(file)
-        if clean:
-            remove_redunant_files(final_path)
-    except zipfile.BadZipFile:
+            return False
+
+    if clean:
+        remove_redunant_files(final_path)
+
+    if remove:
         os.remove(file)
-        return False
 
 
-def proc(repo, progress_bar, indexes):
+def proc(repo, progress_bar, indexes, extract):
     if can_skip(repo, indexes):
         progress_bar.update(1)
         return
@@ -122,13 +143,15 @@ def proc(repo, progress_bar, indexes):
 
     if path.exists(org_dir) and len(glob.glob(path.join(org_dir, f'{repo_name}.zip'))) > 0:
         # if directory exists, check if any *.zip file is present under that directory. (with glob)
-        unzip_file(file, org_dir, name=repo_name, remove=False)
-        # tqdm.write(f'{repo} archived (unzip only)')
+        if extract:
+            unzip_file(file, org_dir, name=repo_name, remove=False)
+            # tqdm.write(f'{repo} archived (unzip only)')
     else:
         dl = download_zip(repo, use_api=False)
         if dl:
-            unzip_file(file, org_dir, name=repo_name, remove=False)
-            # tqdm.write(f'{repo} archived')
+            if extract:
+                unzip_file(file, org_dir, name=repo_name, remove=False)
+                # tqdm.write(f'{repo} archived')
         else:
             add_error(repo)
             tqdm.write(
@@ -141,25 +164,25 @@ def proc(repo, progress_bar, indexes):
 @click.option('--f', prompt='file path',
               help='json file path containing the list of repositories')
 @click.option('--total', default=None, help='max count limit from the input file.')
-@click.option('--threads', default=36, help='threads count to use.')
-def main(f, total, threads):
+@click.option('--threads', default=cpu_count(), help='threads count to use.')
+@click.option('--extract', default=True, help='rather to extract file after download zip', type=bool)
+def main(f, total, threads, extract):
 
     repo_set = [x['id']
                 for x in json.load(open(f))]
 
     indexes = read_index(errors=True)
-
     if total is not None:
         repo_set = repo_set[:total]
 
     total = len(repo_set)
-    threads = max(cpu_count(), threads)  # min 36
     print(f'starting archiver... using {threads} threads.')
 
     progress_bar = tqdm(total=total, position=threads+4, leave=True)
 
     pool = ThreadPool(threads)
-    download_func = partial(proc, progress_bar=progress_bar, indexes=indexes)
+    download_func = partial(proc, progress_bar=progress_bar,
+                            indexes=indexes, extract=extract)
     results = pool.map(download_func, repo_set)
     pool.close()
     pool.join()
