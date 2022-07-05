@@ -1,3 +1,4 @@
+virtualenv
 tqdm
 PyGithub
 requests
@@ -5,3 +6,4 @@ bs4
 python-dotenv
 click
 python-magic
+python-magic-bin
