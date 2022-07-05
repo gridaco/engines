@@ -37,7 +37,8 @@ def can_skip(repo, indexes):
     return False
 
 
-def download_zip(repo, use_api=True, max_mb=30):
+def download_zip(repo, use_api=True, max_mb=None):
+    max_mb_in_bytes = max_mb * KB1 * KB1 if max_mb is not None else None
     fullname = repo
     org_name = repo.split('/')[0]
     repo_name = repo.split('/')[1]
@@ -64,7 +65,7 @@ def download_zip(repo, use_api=True, max_mb=30):
         total_size_in_bytes = int(response.headers.get('content-length', 0))
 
         # if file bigger than <max_mb>mb, pass. (return False)
-        if total_size_in_bytes > max_mb * KB1 * KB1:
+        if max_mb is not None and (total_size_in_bytes > max_mb_in_bytes):
             return False
 
         # description's length to 40 (fixed).
@@ -73,13 +74,12 @@ def download_zip(repo, use_api=True, max_mb=30):
                             unit='iB', unit_scale=True, leave=False, desc=_desc)
 
         with open(file, 'wb') as file:
-            max_mb_in_bytes = max_mb * KB1 * KB1
             for data in response.iter_content(KB1):
                 progress_bar.update(len(data))
                 file.write(data)
                 # if file is bigger than <max_mb>mb, abort download and remove. (return False)
                 # this will not be indexed, which means in the next execution same repo will be canceled after <max_mb>mb (if the arguments are the same)
-                if progress_bar.n > max_mb_in_bytes:
+                if max_mb is not None and (progress_bar.n > max_mb_in_bytes):
                     progress_bar.close()
                     os.remove(file)
                     return False
