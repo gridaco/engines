@@ -58,17 +58,23 @@ def remove_redunant_files(path, recursive=True, log=False):
         tqdm.write(f'Removing redunant files from {path}')
 
     for pattern in remove:
-        for file in glob.glob(os.path.join(path, '**/' + pattern), recursive=recursive):
-            # if directory, remove it
-            if os.path.isdir(file):
-                shutil.rmtree(file, ignore_errors=True)
-            else:
-                try:
-                    os.remove(file)
-                except FileNotFoundError:
-                    pass
+        try:
+            for file in glob.glob(os.path.join(path, '**/' + pattern), recursive=recursive):
+                # if directory, remove it
+                if os.path.isdir(file):
+                    shutil.rmtree(file, ignore_errors=True)
+                else:
+                    try:
+                        os.remove(file)
+                    except FileNotFoundError:
+                        pass
+                if log:
+                    tqdm.write(f'rm - {file}')
+        except TypeError:
+            pass
+        except Exception as e:
             if log:
-                tqdm.write(f'rm - {file}')
+                print(e)
 
 
 def clear_empty_directories():
