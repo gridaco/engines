@@ -178,7 +178,7 @@ def proc(repo, progress_bar, indexes, extract, max_zip_size=None):
               help='json file path containing the list of repositories')
 @click.option('--total', default=None, help='max count limit from the input file.')
 @click.option('--threads', default=cpu_count(), help='threads count to use.')
-@click.option('--max-zip-size', default=None, help='limit the max zip size per request. (mb)')
+@click.option('--max-zip-size', default=None, help='limit the max zip size per request. (mb)', type=int)
 @click.option('--extract', default=True, help='rather to extract file after download zip', type=bool)
 def main(f, total, threads, extract, max_zip_size):
 
