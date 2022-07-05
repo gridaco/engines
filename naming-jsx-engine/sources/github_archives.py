@@ -73,11 +73,18 @@ def download_zip(repo, use_api=True, max_mb=30):
                             unit='iB', unit_scale=True, leave=False, desc=_desc)
 
         with open(file, 'wb') as file:
+            max_mb_in_bytes = max_mb * KB1 * KB1
             for data in response.iter_content(KB1):
                 progress_bar.update(len(data))
                 file.write(data)
+                # if file is bigger than <max_mb>mb, abort download and remove. (return False)
+                # this will not be indexed, which means in the next execution same repo will be canceled after <max_mb>mb (if the arguments are the same)
+                if progress_bar.n > max_mb_in_bytes:
+                    progress_bar.close()
+                    os.remove(file)
+                    return False
         progress_bar.close()
-        # progress_bar.
+
         return True
     except GithubException:
         return False
@@ -137,7 +144,7 @@ def unzip_file(file, dir, name=None, remove=False, clean=True):
     return True
 
 
-def proc(repo, progress_bar, indexes, extract):
+def proc(repo, progress_bar, indexes, extract, max_zip_size=None):
     if can_skip(repo, indexes):
         progress_bar.update(1)
         return
@@ -153,7 +160,7 @@ def proc(repo, progress_bar, indexes, extract):
             unzip_file(file, org_dir, name=repo_name, remove=False)
             # tqdm.write(f'{repo} archived (unzip only)')
     else:
-        dl = download_zip(repo, use_api=False)
+        dl = download_zip(repo, use_api=False, max_mb=max_zip_size)
         if dl:
             if extract:
                 unzip_file(file, org_dir, name=repo_name, remove=False)
@@ -171,8 +178,9 @@ def proc(repo, progress_bar, indexes, extract):
               help='json file path containing the list of repositories')
 @click.option('--total', default=None, help='max count limit from the input file.')
 @click.option('--threads', default=cpu_count(), help='threads count to use.')
+@click.option('--max-zip-size', default=None, help='limit the max zip size per request. (mb)')
 @click.option('--extract', default=True, help='rather to extract file after download zip', type=bool)
-def main(f, total, threads, extract):
+def main(f, total, threads, extract, max_zip_size):
 
     repo_set = [x['id']
                 for x in json.load(open(f))]
@@ -188,7 +196,7 @@ def main(f, total, threads, extract):
 
     pool = ThreadPool(threads)
     download_func = partial(proc, progress_bar=progress_bar,
-                            indexes=indexes, extract=extract)
+                            indexes=indexes, extract=extract, max_zip_size=max_zip_size)
     results = pool.map(download_func, repo_set)
     pool.close()
     pool.join()
