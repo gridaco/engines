@@ -73,14 +73,15 @@ def download_zip(repo, use_api=True, max_mb=None):
         progress_bar = tqdm(total=total_size_in_bytes,
                             unit='iB', unit_scale=True, leave=False, desc=_desc)
 
-        with open(file, 'wb') as file:
+        with open(file, 'wb') as fp:
             for data in response.iter_content(KB1):
                 progress_bar.update(len(data))
-                file.write(data)
+                fp.write(data)
                 # if file is bigger than <max_mb>mb, abort download and remove. (return False)
                 # this will not be indexed, which means in the next execution same repo will be canceled after <max_mb>mb (if the arguments are the same)
                 if max_mb is not None and (progress_bar.n > max_mb_in_bytes):
                     progress_bar.close()
+                    fp.close()
                     os.remove(file)
                     return False
         progress_bar.close()
