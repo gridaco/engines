@@ -94,16 +94,20 @@ def unzip_file(file, dir, name=None, remove=False, clean=True):
     type = mime.from_file(file)
 
     if type == 'application/gzip':
-        # tar.gz if via wget
-        file = tarfile.open(file, 'r:gz')
-        old_path = path.join(dir, os.path.commonprefix(file.getnames()))
-        final_path = old_path
-        file.extractall(dir)
-        file.close()
-        if name is not None:
-            new_path = path.join(dir, name)
-            final_path = new_path
-            os.rename(old_path, new_path)
+        try:
+            # tar.gz if via wget
+            file = tarfile.open(file, 'r:gz')
+            old_path = path.join(dir, os.path.commonprefix(file.getnames()))
+            final_path = old_path
+            file.extractall(dir)
+            file.close()
+            if name is not None:
+                new_path = path.join(dir, name)
+                final_path = new_path
+                os.rename(old_path, new_path)
+        except tarfile.ExtractError as e:
+            os.remove(file)
+            return False
 
     # zip if via api
     if type == 'application/zip':
@@ -129,6 +133,8 @@ def unzip_file(file, dir, name=None, remove=False, clean=True):
 
     if remove:
         os.remove(file)
+
+    return True
 
 
 def proc(repo, progress_bar, indexes, extract):
@@ -189,7 +195,9 @@ def main(f, total, threads, extract):
 
 
 if __name__ == '__main__':
-    # example: python3 github_archives.py --f=/Users/softmarshmallow/Documents/Apps/grida/engine/scraper/styled-components.json
+    # example: python3 github_archives.py --f=<input-file.json> --threads=<thread-count>
+    # - python3 github_archives.py --f=/Users/softmarshmallow/Documents/Apps/grida/engine/scraper/styled-components.json --threads=36
+
     index()  # before starting
     main()
     index()  # after complete

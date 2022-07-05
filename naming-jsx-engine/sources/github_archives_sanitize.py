@@ -71,7 +71,22 @@ def remove_redunant_files(path, recursive=True, log=False):
                 tqdm.write(f'rm - {file}')
 
 
+def clear_empty_directories():
+    # TODO: not tested
+    # clears empty org directories
+    # https://stackoverflow.com/a/47093793/5463235
+
+    i = 0
+    for folder in os.walk(ARCHIVES_DIR):
+        if i != 0:
+            # folder example: ('FOLDER/3', [], ['file'])
+            if not folder[2]:
+                os.rmdir(folder[0])
+                print(f'rm - {folder[0]}')
+
+
 if __name__ == '__main__':
+    # clear_empty_directories()
     dirs = os.listdir(ARCHIVES_DIR)
     bar = tqdm(total=len(dirs), position=0)
     # loop through all directories under the archives directory
