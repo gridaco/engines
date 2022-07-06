@@ -43,7 +43,7 @@ def read_index(errors=False):
 def add_to_index(repos):
     existing = read_index()
     # make unique set of repos
-    repos = set(existing + repos)
+    repos = sorted(set(existing + repos))
     with open(INDEX_FILE, 'a') as f:
         for repo in repos:
             f.write(f'{repo}\n')
@@ -67,8 +67,9 @@ def index():
     add_to_index(repos)
     bar.close()
     print(
-        f'Indexing.. Total: {total} repos. (was {before})')
+        f'New: Indexing.. Total: {total} repos. (was {before})')
 
 
 if __name__ == '__main__':
+    print('reading from..', ARCHIVES_DIR)
     index()
