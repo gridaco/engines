@@ -95,6 +95,10 @@ def download_zip(repo, use_api=True, max_mb=None):
         return False
 
 
+def extract_only():
+    pass
+
+
 def unzip_file(file, dir, name=None, remove=False, clean=True):
     final_path = None
 
