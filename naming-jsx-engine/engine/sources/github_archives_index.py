@@ -45,6 +45,9 @@ def add_to_index(repos):
     # make unique set of repos
     repos = sorted(set(existing + repos))
     with open(INDEX_FILE, 'a') as f:
+        # clear existing
+        f.truncate(0)
+        # write new
         for repo in repos:
             f.write(f'{repo}\n')
         f.close()
