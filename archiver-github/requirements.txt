@@ -1,0 +1,8 @@
+virtualenv
+tqdm
+PyGithub
+requests
+python-dotenv
+click
+python-magic
+python-magic-bin
