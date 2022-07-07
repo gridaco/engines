@@ -16,8 +16,11 @@
 
 ## dataset
 
-- name
 - path (relative path to project root)
+- name
+- tag
+- parent
+- children
 - style k:v set
 
 ## input / output
