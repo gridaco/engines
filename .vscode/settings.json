@@ -8,6 +8,7 @@
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
     "**/node_modules": true,
-    "**/archives": true
+    "**/archives": true,
+    "data": true
   }
 }
