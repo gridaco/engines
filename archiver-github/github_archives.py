@@ -4,7 +4,7 @@ import magic
 import json
 from github import Github, GithubException
 from multiprocessing import cpu_count
-from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing.dummy import Pool
 from functools import partial
 import requests
 from tqdm import tqdm
@@ -223,18 +223,22 @@ def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives
     print(f'starting archiver... using {threads} threads.')
 
     progress_bar = tqdm(total=total, position=threads+4, leave=True)
-    pool = ThreadPool(threads)
-    download_func = partial(proc,
-                            progress_bar=progress_bar,
-                            archives_dir=settings.ARCHIVES_DIR,
-                            indexes=indexes,
-                            extract=extract,
-                            max_zip_size=max_zip_size
-                        )
+    pool = Pool(threads) # maxtasksperchild=1 (works on subprocesses, not subprocesses.dummy)
 
     try:
-        pool.map(download_func, repo_set)
-        pool.close()
+        # TODO: since map leaves the instance alive, it will cause memory leak.
+        pool.map(
+            partial(
+                proc,
+                progress_bar=progress_bar,
+                archives_dir=settings.ARCHIVES_DIR,
+                indexes=indexes,
+                extract=extract,
+                max_zip_size=max_zip_size
+            ),
+            repo_set
+        )
+        pool.terminate()
         pool.join()
     except KeyboardInterrupt:
         progress_bar.close()
