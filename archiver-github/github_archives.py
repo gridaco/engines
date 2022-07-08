@@ -202,7 +202,7 @@ def main(f, total, threads, extract, max_zip_size):
     pool = ThreadPool(threads)
     download_func = partial(proc, progress_bar=progress_bar,
                             indexes=indexes, extract=extract, max_zip_size=max_zip_size)
-    results = pool.map(download_func, repo_set)
+    pool.map(download_func, repo_set)
     pool.close()
     pool.join()
 
