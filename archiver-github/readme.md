@@ -22,9 +22,18 @@ source venv/bin/activate
 GITHUB_ACCESS_TOKEN=<personal-github-access-token>
 # you can configure external storage for the archives (Make sure this is a empty directory and a valid, existing directory.)
 PUBLIC_GITHUB_ARCHIVES_DIR=<root-directory-to-save-archives>
+# if non set, it will use the same directory as archives dir.
+PUBLIC_GITHUB_UNARCHIVES_DIR=<root-directory-to-extract-archives>
 ```
 
 👉 [How to get Github personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+
+## How to use
+
+```sh
+# The archiver
+# The unarchiver
+```
 
 ## Hardware setups
 

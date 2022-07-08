@@ -1,9 +1,22 @@
 import pathlib
 import os
 from os import path
-import glob
 from dotenv import load_dotenv
 
 load_dotenv(verbose=True)
 
-ARCHIVES_DIR = os.getenv("PUBLIC_GITHUB_ARCHIVES_DIR")
+_DIR = pathlib.Path(__file__).parent.absolute()
+
+ARCHIVES_DIR_FALLBACK = os.path.join(_DIR, 'archives')
+
+ARCHIVES_DIR = os.getenv("PUBLIC_GITHUB_ARCHIVES_DIR", ARCHIVES_DIR_FALLBACK)
+# load from env 'PUBLIC_GITHUB_UNARCHIVES_DIR', if not set, use same value as ARCHIVES_DIR
+UNARCHIVES_DIR = os.getenv("PUBLIC_GITHUB_UNARCHIVES_DIR", ARCHIVES_DIR)
+
+
+def print_warnings(silent=False):
+    if silent:
+        return
+    if ARCHIVES_DIR == ARCHIVES_DIR_FALLBACK:
+        print(
+            "WARNING: PUBLIC_GITHUB_ARCHIVES_DIR not set, using default: " + ARCHIVES_DIR)
