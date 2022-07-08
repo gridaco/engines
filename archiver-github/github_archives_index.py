@@ -1,50 +1,55 @@
 from tqdm import tqdm
 from os import path
 import glob
-from settings import ARCHIVES_DIR
+import settings
 import csv  # TODO: make with csv
 
-INDEX_FILE = path.join(ARCHIVES_DIR, 'index')
-ERRORS_INDEX_FILE = path.join(ARCHIVES_DIR, 'index-errors')
+def index_file_dir():
+    return path.join(settings.ARCHIVES_DIR, 'index')
+
+def errors_index_file_dir():
+    return path.join(settings.ARCHIVES_DIR, 'index-errors')
 
 
 def add_error(repo):
-    with open(ERRORS_INDEX_FILE, 'a') as f:
+    with open(errors_index_file_dir(), 'a') as f:
         f.write(f'{repo}\n')
         f.close()
 
 
 def read_errors():
     errors = []
-    with open(ERRORS_INDEX_FILE, 'r') as f:
+    with open(errors_index_file_dir(), 'r') as f:
         for l in f.readlines():
             errors.append(l.strip())
     return errors
 
 
 def create_index_if_not_exists():
-    if not path.exists(INDEX_FILE):
-        with open(INDEX_FILE, 'w') as f:
+    if not path.exists(index_file_dir()):
+        with open(index_file_dir(), 'w') as f:
             f.close()
 
-    if not path.exists(ERRORS_INDEX_FILE):
-        with open(ERRORS_INDEX_FILE, 'w') as f:
+    if not path.exists(errors_index_file_dir()):
+        with open(errors_index_file_dir(), 'w') as f:
             f.close()
 
 
 def read_index(errors=False):
     indexes = []
-    with open(INDEX_FILE, 'r') as f:
+    with open(index_file_dir(), 'r') as f:
         for l in f.readlines():
             indexes.append(l.strip())
-    return indexes + read_errors()
+    if errors:
+        return indexes + read_errors()
+    return indexes
 
 
 def add_to_index(repos):
     existing = read_index()
     # make unique set of repos
     repos = sorted(set(existing + repos))
-    with open(INDEX_FILE, 'a') as f:
+    with open(index_file_dir(), 'a') as f:
         # clear existing
         f.truncate(0)
         # write new
@@ -56,7 +61,7 @@ def add_to_index(repos):
 def index():
     create_index_if_not_exists()
     # glob: get all the .zip files under.
-    files = glob.glob(path.join(ARCHIVES_DIR, '*/*.zip'))
+    files = glob.glob(path.join(settings.ARCHIVES_DIR, '*/*.zip'))
     total = len(files)
     bar = tqdm(total=total)
     repos = []
@@ -74,5 +79,5 @@ def index():
 
 
 if __name__ == '__main__':
-    print('reading from..', ARCHIVES_DIR)
+    print('reading from..', settings.ARCHIVES_DIR)
     index()

@@ -2,7 +2,8 @@ import glob
 import os
 from tqdm import tqdm
 import shutil
-from settings import ARCHIVES_DIR
+import settings
+
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -147,7 +148,7 @@ def clear_empty_directories():
     # https://stackoverflow.com/a/47093793/5463235
 
     i = 0
-    for folder in os.walk(ARCHIVES_DIR):
+    for folder in os.walk(settings.ARCHIVES_DIR):
         if i != 0:
             # folder example: ('FOLDER/3', [], ['file'])
             if not folder[2]:
@@ -157,11 +158,11 @@ def clear_empty_directories():
 
 if __name__ == '__main__':
     # clear_empty_directories()
-    dirs = sorted(os.listdir(ARCHIVES_DIR))
+    dirs = sorted(os.listdir(settings.ARCHIVES_DIR))
     bar = tqdm(total=len(dirs), position=0)
     # loop through all directories under the archives directory
     for orgs in dirs:
-        org_path = os.path.join(ARCHIVES_DIR, orgs)
+        org_path = os.path.join(settings.ARCHIVES_DIR, orgs)
         if os.path.isdir(org_path):
             # list repo dirs under the orgs directory
             for repo in os.listdir(org_path):
