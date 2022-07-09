@@ -25,11 +25,13 @@ gh = Github(os.environ['GITHUB_ACCESS_TOKEN'])
 
 downloading = []
 
+
 def clean_tmp_downloads():
     for tmp in downloading:
-            if os.path.exists(tmp):
-                tqdm.write(f'-removing tmp file: {tmp}')
-                os.remove(tmp)
+        if os.path.exists(tmp):
+            tqdm.write(f'-removing tmp file: {tmp}')
+            os.remove(tmp)
+
 
 def _make_desc(repo, l=50):
     raw = f'repo: {repo}'
@@ -81,7 +83,7 @@ def download_zip(repo, archives_dir=settings.ARCHIVES_DIR, use_api=True, max_mb=
         _desc = _make_desc(fullname)
         progress_bar = tqdm(total=total_size_in_bytes,
                             unit='iB', unit_scale=True, leave=False, desc=_desc)
-        
+
         downloading.append(file)
         with open(file, 'wb') as fp:
             for data in response.iter_content(KB1):
@@ -182,7 +184,8 @@ def proc(repo, progress_bar, archives_dir, indexes, extract, max_zip_size=None):
             unzip_file(file, org_dir, name=repo_name, remove=False)
             # tqdm.write(f'{repo} archived (unzip only)')
     else:
-        dl = download_zip(repo, archives_dir=archives_dir, use_api=False, max_mb=max_zip_size)
+        dl = download_zip(repo, archives_dir=archives_dir,
+                          use_api=False, max_mb=max_zip_size)
         if dl:
             if extract:
                 unzip_file(file, org_dir, name=repo_name, remove=False)
@@ -214,16 +217,23 @@ def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives
 
     repo_set = [x[key]
                 for x in json.load(open(f))]
-
+    total = len(repo_set)
     indexes = read_index(errors=True)
+
+    # remove duplicates from with indexes from repo_set (remove item from indexes from repo_set)
+    tqdm.write('cleaning indexes')
+    repo_set = list(set(repo_set) - set(indexes))
+    tqdm.write(
+        f'{len(repo_set)} repositories to download ({len(indexes)} already archived)')
+
     if total is not None:
         repo_set = repo_set[:total]
 
-    total = len(repo_set)
     print(f'starting archiver... using {threads} threads.')
 
     progress_bar = tqdm(total=total, position=threads+4, leave=True)
-    pool = Pool(threads) # maxtasksperchild=1 (works on subprocesses, not subprocesses.dummy)
+    # maxtasksperchild=1 (works on subprocesses, not subprocesses.dummy)
+    pool = Pool(threads)
 
     try:
         # TODO: since map leaves the instance alive, it will cause memory leak.
@@ -249,7 +259,6 @@ def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives
         clean_tmp_downloads()
 
     index()  # after complete
-
 
 
 if __name__ == '__main__':
