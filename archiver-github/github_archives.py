@@ -226,16 +226,18 @@ def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives
     # maxtasksperchild=1 (works on subprocesses, not subprocesses.dummy)
     pool = Pool(threads)
 
+    _func = partial(
+        proc,
+        progress_bar=progress_bar,
+        archives_dir=settings.ARCHIVES_DIR,
+        extract=extract,
+        max_zip_size=max_zip_size
+    )
+
     try:
         # TODO: since map leaves the instance alive, it will cause memory leak.
         pool.map(
-            partial(
-                proc,
-                progress_bar=progress_bar,
-                archives_dir=settings.ARCHIVES_DIR,
-                extract=extract,
-                max_zip_size=max_zip_size
-            ),
+            _func,
             repo_set
         )
         pool.terminate()
