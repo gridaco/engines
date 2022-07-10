@@ -42,12 +42,6 @@ def _make_desc(repo, l=50):
     return raw
 
 
-def can_skip(repo, indexes):
-    if repo in indexes:
-        return True
-    return False
-
-
 def download_zip(repo, archives_dir=settings.ARCHIVES_DIR, use_api=True, max_mb=None):
     max_mb_in_bytes = max_mb * KB1 * KB1 if max_mb is not None else None
     fullname = repo
@@ -168,11 +162,7 @@ def unzip_file(file, dir, name=None, remove=False, clean=True):
     return True
 
 
-def proc(repo, progress_bar, archives_dir, indexes, extract, max_zip_size=None):
-    if can_skip(repo, indexes):
-        progress_bar.update(1)
-        return
-
+def proc(repo, progress_bar, archives_dir, extract, max_zip_size=None):
     org = repo.split('/')[0]
     repo_name = repo.split('/')[1]
     org_dir = path.join(archives_dir, org)
@@ -243,7 +233,6 @@ def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives
                 proc,
                 progress_bar=progress_bar,
                 archives_dir=settings.ARCHIVES_DIR,
-                indexes=indexes,
                 extract=extract,
                 max_zip_size=max_zip_size
             ),
