@@ -1,11 +1,15 @@
+from time import time
 from tqdm import tqdm
 from os import path
+import os
 import glob
 import settings
 import csv  # TODO: make with csv
 
+
 def index_file_dir():
     return path.join(settings.ARCHIVES_DIR, 'index')
+
 
 def errors_index_file_dir():
     return path.join(settings.ARCHIVES_DIR, 'index-errors')
@@ -59,7 +63,11 @@ def add_to_index(repos):
 
 
 def index():
+    _t_1 = time()
     create_index_if_not_exists()
+
+    orgs = os.listdir(settings.ARCHIVES_DIR)
+
     # glob: get all the .zip files under.
     files = glob.glob(path.join(settings.ARCHIVES_DIR, '*/*.zip'))
     total = len(files)
@@ -74,8 +82,9 @@ def index():
     before = len(read_index())
     add_to_index(repos)
     bar.close()
+    _t_2 = time()
     print(
-        f'New: Indexing.. Total: {total} repos. (was {before})')
+        f'New: Indexing.. Total: {total} repos. (was {before}) (took {_t_2 - _t_1} seconds)')
 
 
 if __name__ == '__main__':

@@ -231,7 +231,8 @@ def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives
 
     print(f'starting archiver... using {threads} threads.')
 
-    progress_bar = tqdm(total=total, position=threads+4, leave=True)
+    progress_bar = tqdm(total=total, position=threads+4,
+                        leave=True, initial=len(indexes))
     # maxtasksperchild=1 (works on subprocesses, not subprocesses.dummy)
     pool = Pool(threads)
 
