@@ -1,6 +1,5 @@
 import sys
 import click
-import magic
 import json
 from github import Github, GithubException
 from multiprocessing import cpu_count
@@ -12,12 +11,10 @@ import pathlib
 import os
 from os import path
 import glob
-import zipfile
-import tarfile
 import settings
 from settings import set_archives_dir
-from github_archives_sanitize import remove_redunant_files
 from github_archives_index import read_index, add_error, index
+from github_unarchives import unzip_file
 
 KB1 = 1024  # 1 Kibibyte
 DIR = pathlib.Path(__file__).parent.resolve()
@@ -106,60 +103,6 @@ def download_zip(repo, archives_dir=settings.ARCHIVES_DIR, use_api=True, max_mb=
         return False
     except Exception as e:
         return False
-
-
-def extract_only():
-    pass
-
-
-def unzip_file(file, dir, name=None, remove=False, clean=True):
-    final_path = None
-
-    mime = magic.Magic(mime=True)
-    type = mime.from_file(file)
-
-    if type == 'application/gzip':
-        try:
-            # tar.gz if via wget
-            file = tarfile.open(file, 'r:gz')
-            old_path = path.join(dir, os.path.commonprefix(file.getnames()))
-            final_path = old_path
-            file.extractall(dir)
-            file.close()
-            if name is not None:
-                new_path = path.join(dir, name)
-                final_path = new_path
-                os.rename(old_path, new_path)
-        except tarfile.ExtractError as e:
-            os.remove(file)
-            return False
-
-    # zip if via api
-    if type == 'application/zip':
-        try:
-            with zipfile.ZipFile(file, 'r') as zip_ref:
-                zipinfos = zip_ref.infolist()
-                zipinfo = zipinfos[0]
-                old_path = path.join(dir, zipinfo.filename)
-                final_path = old_path
-                zip_ref.extractall(dir)
-                # rename the extracted directory name if name is given
-                if name is not None:
-                    new_path = path.join(dir, name)
-                    final_path = new_path
-                    os.rename(old_path, new_path)
-
-        except zipfile.BadZipFile as e:
-            os.remove(file)
-            return False
-
-    if clean:
-        remove_redunant_files(final_path)
-
-    if remove:
-        os.remove(file)
-
-    return True
 
 
 def proc(repo, progress_bar, archives_dir, extract, max_zip_size=None):
