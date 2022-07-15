@@ -4,4 +4,4 @@ PyGithub
 requests
 python-dotenv
 click
-python-magic-bin
+python-magic
