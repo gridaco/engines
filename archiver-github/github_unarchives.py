@@ -35,47 +35,41 @@ def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
                         any(fnmatch.fnmatch(name, pattern) for pattern in include)
 
     if type == 'application/gzip':
-        try:
-            file = tarfile.open(file, 'r:gz')
-            # extract only files with matching patterns
-            for member in file.getmembers():
-                # match name with glob - member.name
-                # should not match any of in exclude (fnmatch)
-                # should match at least one of in include (fnmatch)
-                if matches(member.name):
-                    file.extract(member, dir)
-            if name is not None:
-                old_path = path.join(
-                    dir, os.path.commonprefix(file.getnames()))
-                new_path = path.join(dir, name)
-                os.rename(old_path, new_path)
-            file.close()
-            return True
-        except tarfile.ExtractError as e:
-            return False
+        file = tarfile.open(file, 'r:gz')
+        # extract only files with matching patterns
+        for member in file.getmembers():
+            # match name with glob - member.name
+            # should not match any of in exclude (fnmatch)
+            # should match at least one of in include (fnmatch)
+            if matches(member.name):
+                file.extract(member, dir)
+        if name is not None:
+            old_path = path.join(
+                dir, os.path.commonprefix(file.getnames()))
+            new_path = path.join(dir, name)
+            os.rename(old_path, new_path)
+        file.close()
+        return True
+
 
     if type == 'application/zip':
-        try:
-            with zipfile.ZipFile(file, 'r') as zip_ref:
-                zipinfos = zip_ref.infolist()
-                zipinfo = zipinfos[0]
+        with zipfile.ZipFile(file, 'r') as zip_ref:
+            zipinfos = zip_ref.infolist()
+            zipinfo = zipinfos[0]
 
-                # extract only files with matching patterns
-                for member in zip_ref.infolist():
-                    if matches(member.filename):
-                        zip_ref.extract(member, dir)
+            # extract only files with matching patterns
+            for member in zip_ref.infolist():
+                if matches(member.filename):
+                    zip_ref.extract(member, dir)
 
-                # rename the extracted directory name if name is given
-                if name is not None:
-                    old_path = path.join(dir, zipinfo.filename)
-                    new_path = path.join(dir, name)
-                    os.rename(old_path, new_path)
+            # rename the extracted directory name if name is given
+            if name is not None:
+                old_path = path.join(dir, zipinfo.filename)
+                new_path = path.join(dir, name)
+                os.rename(old_path, new_path)
 
-                file.close()
-                return True
+            file.close()
 
-        except zipfile.BadZipFile as e:
-            return False
 
 
 def unzip_file(file, dir, name=None, remove=False, clean=True, cleaner=remove_redunant_files):
@@ -128,10 +122,13 @@ def unzip_file(file, dir, name=None, remove=False, clean=True, cleaner=remove_re
 
 
 def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude, clean):
-    name = archive.split('/')[-1]
-    file = path.join(archives_dir, archive, ".zip")
-    extract_only(file=file, dir=path.join(unarchives_dir, archive), include=include, exclude=exclude, name=name)
-    indexer.add_to_index(archive)
+    try:
+        name = archive.split('/')[-1]
+        file = path.join(archives_dir, archive, ".zip")
+        extract_only(file=file, dir=path.join(unarchives_dir, archive), include=include, exclude=exclude, name=name)
+        indexer.add_to_index(archive)
+    except Exception as e:
+        indexer.add_error(archive)
     progress_bar.update(1)
 
 
@@ -149,12 +146,14 @@ def main(index, mode, patterns, threads, total, targetdir):
     archives = read_index_from_file(index)
     global indexer
     indexer = Indexer(basedir=settings.UNARCHIVES_DIR, init=True)
+    indexes = indexer.read_index(errors=True)
 
     _p = json.load(open(patterns))
     include = _p['include']
     exclude = _p['exclude']
 
 
+    archives = list(set(archives) - set(indexes))
     if total is not None:
         archives = archives[:total]
 
