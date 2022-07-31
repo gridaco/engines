@@ -27,3 +27,7 @@ def set_archives_dir(dir):
     global UNARCHIVES_DIR
     if UNARCHIVES_DIR == ARCHIVES_DIR_FALLBACK:
         UNARCHIVES_DIR = dir
+
+def set_unarchives_dir(dir):
+    global UNARCHIVES_DIR
+    UNARCHIVES_DIR = dir
