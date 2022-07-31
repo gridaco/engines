@@ -1,7 +1,12 @@
+import click
 import glob
 import os
+from os.path import isfile
 from tqdm import tqdm
 import shutil
+import magic
+import zipfile
+import tarfile
 import settings
 
 
@@ -142,13 +147,13 @@ def remove_redunant_files(path, recursive=True, log=False):
     add_meta(path, removed)
 
 
-def clear_empty_directories():
+def clear_empty_directories(under=settings.UNARCHIVES_DIR):
     # TODO: not tested
     # clears empty org directories
     # https://stackoverflow.com/a/47093793/5463235
 
     i = 0
-    for folder in os.walk(settings.ARCHIVES_DIR):
+    for folder in os.walk(under):
         if i != 0:
             # folder example: ('FOLDER/3', [], ['file'])
             if not folder[2]:
@@ -156,8 +161,43 @@ def clear_empty_directories():
                 print(f'rm - {folder[0]}')
 
 
-if __name__ == '__main__':
+def remove_invalid_archives(under=settings.UNARCHIVES_DIR):
+    i = 0
+    for folder in os.walk(under):
+        if i != 0:
+            # folder example: ('FOLDER/3', [], ['file'])
+            for file in folder[2]:
+                remove_if_invalid_archive(os.path.join(folder[0], file))
+
+
+def remove_if_invalid_archive(file):
+    mime = magic.Magic(mime=True)
+    type = mime.from_file(file)
+    #
+
+    if type == 'application/gzip':
+        try:
+            file = tarfile.open(file, 'r:gz')
+        except tarfile.ExtractError as e:
+            os.remove(file)
+
+    # zip if via api
+    if type == 'application/zip':
+        try:
+            with zipfile.ZipFile(file, 'r') as zip_ref:
+                if zip_ref.testzip() is not None:
+                    os.remove(file)
+
+        except zipfile.BadZipFile:
+            os.remove(file)
+
+
+@click.command()
+def main(dir_archives=settings.ARCHIVES_DIR, dir_unarchives=settings.UNARCHIVES_DIR):
+
     # clear_empty_directories()
+    remove_invalid_archives(dir_archives)
+
     dirs = sorted(os.listdir(settings.ARCHIVES_DIR))
     bar = tqdm(total=len(dirs), position=0)
     # loop through all directories under the archives directory
@@ -172,3 +212,7 @@ if __name__ == '__main__':
                     remove_redunant_files(path, recursive=True, log=True)
 
                     bar.update(1)
+
+
+if __name__ == '__main__':
+    main()

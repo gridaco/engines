@@ -16,7 +16,7 @@ import zipfile
 import tarfile
 import settings
 from settings import set_archives_dir
-from github_archives_sanitize import remove_redunant_files
+from github_repos_sanitize import remove_redunant_files
 from github_archives_index import read_index, add_error, index
 
 KB1 = 1024  # 1 Kibibyte
