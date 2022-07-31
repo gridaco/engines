@@ -1,0 +1,12 @@
+{
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.json"
+  ],
+  "exclide": [
+    "node_modules"
+  ]
+}

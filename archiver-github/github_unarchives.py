@@ -1,6 +1,7 @@
 import json
 import os
 from os import path
+import fnmatch
 import click
 import zipfile
 import tarfile
@@ -10,29 +11,39 @@ from functools import partial
 from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool
 from github_unarchives_sanitize import remove_redunant_files
-from github_archives_index import read_index
+from github_archives_index import read_index_from_file, Indexer
 import settings
+
 mime = magic.Magic(mime=True)
 # mode
 # 1. extact only (extracts only files with matching patterns)
 # 2. clean after extract (removes files with matching patterns, after extract-all)
 
 
-def extract_only(file, dir, patterns, name=None):
+indexer: Indexer = None
+
+
+def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
     """
     @param patterns: list of patterns to match e.g. - ['*.py', '*.pyc']
     """
 
     type = mime.from_file(file)
 
+    def matches(name):
+        return not any(fnmatch.fnmatch(name, pattern) for pattern in exclude) and \
+                        any(fnmatch.fnmatch(name, pattern) for pattern in include)
+
     if type == 'application/gzip':
         try:
             file = tarfile.open(file, 'r:gz')
             # extract only files with matching patterns
             for member in file.getmembers():
-                for pattern in patterns:
-                    if pattern in member.name:
-                        file.extract(member, dir)
+                # match name with glob - member.name
+                # should not match any of in exclude (fnmatch)
+                # should match at least one of in include (fnmatch)
+                if matches(member.name):
+                    file.extract(member, dir)
             if name is not None:
                 old_path = path.join(
                     dir, os.path.commonprefix(file.getnames()))
@@ -51,9 +62,8 @@ def extract_only(file, dir, patterns, name=None):
 
                 # extract only files with matching patterns
                 for member in zip_ref.infolist():
-                    for pattern in patterns:
-                        if pattern in member.filename:
-                            zip_ref.extract(member, dir)
+                    if matches(member.filename):
+                        zip_ref.extract(member, dir)
 
                 # rename the extracted directory name if name is given
                 if name is not None:
@@ -117,32 +127,39 @@ def unzip_file(file, dir, name=None, remove=False, clean=True, cleaner=remove_re
     return True
 
 
-def proc(progress_bar, archives_dir, unarchives_dir, patterns, name, clean, cleaner):
-    pass
+def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude, clean):
+    name = archive.split('/')[-1]
+    file = path.join(archives_dir, archive, ".zip")
+    extract_only(file=file, dir=path.join(unarchives_dir, archive), include=include, exclude=exclude, name=name)
+    indexer.add_to_index(archive)
+    progress_bar.update(1)
 
+
+# python github_unarchives.py --index=/Volumes/DB64/github-public-archives/archives/index --targetdir=/Volumes/other-volume --threads=100 --total=1000
 
 @click.command()
-@click.option('--archives', default='.', help='Directory to extract archives from')
-@click.option('--archives-patterns', default='*.zip, *.tar.gz', help='Pattern to match archives')
+@click.option('--index', default='.', help='Archives index file')
 @click.option('--mode', default=1, help='Mode: 1. extract only (extracts only files with matching patterns) 2. clean after extract (removes files with matching patterns, after extract-all)')
 @click.option('--patterns', default=None, help='file path for line splitted list of patterns to match - e.g. .gitignore')
 @click.option('--threads', default=1, help='Threads count to utilize')
 @click.option('--total', default=None, help='max count limit to process.')
-def main(archives, archives_patterns, root, mode, patterns, threads, total):
-    print("THIS IS NOT READY.")
-    # orgs = os.listdir(archives)
+@click.option('--targetdir', help='Target directory')
+def main(index, mode, patterns, threads, total, targetdir):
+    settings.set_unarchives_dir(targetdir)
+    archives = read_index_from_file(index)
+    global indexer
+    indexer = Indexer(basedir=settings.UNARCHIVES_DIR, init=True)
 
-    archives_patterns = archives_patterns.split(',')
-    patterns = open(patterns, 'r').read(
-    ).splitlines() if patterns is not None else None
+    _p = json.load(open(patterns))
+    include = _p['include']
+    exclude = _p['exclude']
 
-    indexes = read_index(errors=False)
 
     if total is not None:
-        indexes = indexes[:total]
+        archives = archives[:total]
 
     progress_bar = tqdm(total=total, position=threads+4,
-                        leave=True, initial=len(indexes))
+                        leave=True, initial=len(archives))
 
     pool = Pool(threads)
 
@@ -150,17 +167,17 @@ def main(archives, archives_patterns, root, mode, patterns, threads, total):
         proc,
         progress_bar=progress_bar,
         archives_dir=settings.ARCHIVES_DIR,
-        # extract=extract,
+        unarchives_dir=settings.UNARCHIVES_DIR,
+        include=include,
+        exclude=exclude
     )
 
     pool.map(
         _func,
-        indexes
+        archives
     )
     pool.terminate()
     pool.join()
-
-    pass
 
 
 if __name__ == '__main__':
