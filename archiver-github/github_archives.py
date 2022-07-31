@@ -13,7 +13,7 @@ from os import path
 import glob
 import settings
 from settings import set_archives_dir
-from github_archives_index import read_index, add_error, index
+from github_archives_index import indexArchives, Indexer
 from github_unarchives import unzip_file
 
 KB1 = 1024  # 1 Kibibyte
@@ -21,7 +21,7 @@ DIR = pathlib.Path(__file__).parent.resolve()
 gh = Github(os.environ['GITHUB_ACCESS_TOKEN'])
 
 downloading = []
-
+indexer = None
 
 def clean_tmp_downloads():
     for tmp in downloading:
@@ -124,7 +124,7 @@ def proc(repo, progress_bar, archives_dir, extract, max_zip_size=None):
                 unzip_file(file, org_dir, name=repo_name, remove=False)
                 # tqdm.write(f'{repo} archived')
         else:
-            add_error(repo)
+            indexer.add_error(repo)
             # tqdm.write(
             #     f'not found: something went wrong. - https://github.com/{repo}')
 
@@ -143,15 +143,18 @@ def proc(repo, progress_bar, archives_dir, extract, max_zip_size=None):
 @click.option('--dir-archives', default=settings.ARCHIVES_DIR, help='archives dir settings override')
 def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives):
     set_archives_dir(dir_archives)
+    global indexer
+    indexer = Indexer(settings.ARCHIVES_DIR, init=True)
     print(f':: archives dir: {settings.ARCHIVES_DIR}')
+    
 
     if skip_index is False:
-        index()  # before starting
+        indexArchives()  # before starting
 
     repo_set = [x[key]
                 for x in json.load(open(f))]
     total = len(repo_set)
-    indexes = read_index(errors=True)
+    indexes = indexer.read_index(errors=True)
 
     # remove duplicates from with indexes from repo_set (remove item from indexes from repo_set)
     tqdm.write('cleaning indexes')
@@ -193,7 +196,7 @@ def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives
     finally:
         clean_tmp_downloads()
 
-    index()  # after complete
+    indexArchives()  # after complete
 
 
 if __name__ == '__main__':
