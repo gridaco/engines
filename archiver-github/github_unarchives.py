@@ -31,18 +31,19 @@ def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
     type = mime.from_file(file)
 
     def matches(name):
+        # match name with glob - member.name
+        # should not match any of in exclude (fnmatch)
+        # should match at least one of in include (fnmatch)
         return not any(fnmatch.fnmatch(name, pattern) for pattern in exclude) and \
                         any(fnmatch.fnmatch(name, pattern) for pattern in include)
 
     if type == 'application/gzip':
         file = tarfile.open(file, 'r:gz')
         # extract only files with matching patterns
-        for member in file.getmembers():
-            # match name with glob - member.name
-            # should not match any of in exclude (fnmatch)
-            # should match at least one of in include (fnmatch)
-            if matches(member.name):
-                file.extract(member, dir)
+        targets = [name for name in file.getnames() if matches(name)]
+        for target in targets:
+            file.extract(target, dir)
+
         if name is not None:
             old_path = path.join(
                 dir, os.path.commonprefix(file.getnames()))
@@ -56,11 +57,10 @@ def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
         with zipfile.ZipFile(file, 'r') as zip_ref:
             zipinfos = zip_ref.infolist()
             zipinfo = zipinfos[0]
-
             # extract only files with matching patterns
-            for member in zip_ref.infolist():
-                if matches(member.filename):
-                    zip_ref.extract(member, dir)
+            targets = [name for name in zip_ref.namelist() if matches(name)]
+            for target in targets:
+                zip_ref.extract(target, dir)
 
             # rename the extracted directory name if name is given
             if name is not None:
@@ -72,7 +72,7 @@ def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
 
 
 
-def unzip_file(file, dir, name=None, remove=False, clean=True, cleaner=remove_redunant_files):
+def unzip_file(file, dir, name=None, remove=False, cleaner=None):
     final_path = None
 
     type = mime.from_file(file)
@@ -112,7 +112,7 @@ def unzip_file(file, dir, name=None, remove=False, clean=True, cleaner=remove_re
             os.remove(file)
             return False
 
-    if clean:
+    if cleaner is not None:
         cleaner(final_path)
 
     if remove:
@@ -129,13 +129,12 @@ def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude):
         extract_only(file=file, dir=path.join(unarchives_dir, org), include=include, exclude=exclude, name=name)
         indexer.add(archive)
     except Exception as e:
-        print(e)
+        tqdm.write(e)
         indexer.add_error(archive)
     progress_bar.update(1)
 
 
-# python github_unarchives.py --index=/Volumes/DB64/github-public-archives/archives/index --targetdir=/Volumes/other-volume --threads=100 --max=1000
-# python github_unarchives.py --index=/Volumes/WDB2TB/public-github-archives/archives/index --targetdir=/Volumes/WDB2TB/public-github-archives/unarchives --patterns='/engine/archiver-github/unarchive_patterns/react.json' --threads=100
+# python github_unarchives.py --index=/Volumes/WDB2TB/public-github-archives/archives/index --targetdir=/Volumes/WDB2TB/public-github-archives/unarchives --patterns='/engine/archiver-github/unarchive_patterns/react.json'
 
 @click.command()
 @click.option('--index', default='.', help='Archives index file')
@@ -161,7 +160,7 @@ def main(index, mode, patterns, threads, max, targetdir):
         archives = archives[:max]
 
 
-    progress_bar = tqdm(total=total,
+    progress_bar = tqdm(total=total, position=4,
                         leave=True, initial=len(indexes))
 
     pool = Pool(threads)

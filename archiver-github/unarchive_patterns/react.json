@@ -9,11 +9,15 @@
     "**/*.html",
     "**/package.json",
     "**/*.md",
-    "LICENSE"
+    "**/LICENSE"
   ],
   "exclude": [
-    "node_modules",
-    "dist",
-    "build"
+    "**/node_modules/**/*",
+    "**/dist/**/*",
+    "**/build/**/*",
+    "@types",
+    "**/*.min.css",
+    "**/.storybook/**/*",
+    ".github/**/*"
   ]
 }
