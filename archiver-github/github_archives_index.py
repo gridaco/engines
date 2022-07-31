@@ -11,6 +11,7 @@ class Indexer:
         self.basedir = basedir
         if init:
             self.create_index_if_not_exists()
+        self.f = open(self.index_file_dir(), 'a')
 
     def index_file_dir(self):
         return path.join(self.basedir, 'index')
@@ -46,8 +47,12 @@ class Indexer:
             return indexes + self.read_errors()
         return indexes
 
+    def add(self, repo):
+        # write and save
+        self.f.write(f'{repo}\n')
+        self.f.flush()
 
-    def add_to_index(self, repos):
+    def extend_index(self, repos):
         existing = self.read_index()
         # make unique set of repos
         repos = sorted(set(existing + repos))
@@ -110,7 +115,7 @@ def indexArchives(basedir):
         repo = f'{org_name}/{file_name}'
         repos.append(repo)
     before = len(indexer.read_index())
-    indexer.add_to_index(repos)
+    indexer.extend_index(repos)
     _t_2 = time()
     print(
         f'New: Indexing.. Total: {len(repos)} repos. (was {before}) (took {_t_2 - _t_1} seconds)')

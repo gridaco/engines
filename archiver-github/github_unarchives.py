@@ -127,7 +127,7 @@ def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude):
         name = archive.split('/')[-1]
         file = path.join(archives_dir, archive + ".zip")
         extract_only(file=file, dir=path.join(unarchives_dir, org), include=include, exclude=exclude, name=name)
-        # indexer.add_to_index(archive)
+        indexer.add(archive)
     except Exception as e:
         print(e)
         indexer.add_error(archive)
@@ -161,7 +161,7 @@ def main(index, mode, patterns, threads, max, targetdir):
         archives = archives[:max]
 
 
-    progress_bar = tqdm(total=total, position=threads+4,
+    progress_bar = tqdm(total=total,
                         leave=True, initial=len(indexes))
 
     pool = Pool(threads)
