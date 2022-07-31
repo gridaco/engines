@@ -121,44 +121,48 @@ def unzip_file(file, dir, name=None, remove=False, clean=True, cleaner=remove_re
     return True
 
 
-def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude, clean):
+def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude):
     try:
+        org = archive.split('/')[0]
         name = archive.split('/')[-1]
-        file = path.join(archives_dir, archive, ".zip")
-        extract_only(file=file, dir=path.join(unarchives_dir, archive), include=include, exclude=exclude, name=name)
-        indexer.add_to_index(archive)
+        file = path.join(archives_dir, archive + ".zip")
+        extract_only(file=file, dir=path.join(unarchives_dir, org), include=include, exclude=exclude, name=name)
+        # indexer.add_to_index(archive)
     except Exception as e:
+        print(e)
         indexer.add_error(archive)
     progress_bar.update(1)
 
 
-# python github_unarchives.py --index=/Volumes/DB64/github-public-archives/archives/index --targetdir=/Volumes/other-volume --threads=100 --total=1000
+# python github_unarchives.py --index=/Volumes/DB64/github-public-archives/archives/index --targetdir=/Volumes/other-volume --threads=100 --max=1000
+# python github_unarchives.py --index=/Volumes/WDB2TB/public-github-archives/archives/index --targetdir=/Volumes/WDB2TB/public-github-archives/unarchives --patterns='/engine/archiver-github/unarchive_patterns/react.json' --threads=100
 
 @click.command()
 @click.option('--index', default='.', help='Archives index file')
 @click.option('--mode', default=1, help='Mode: 1. extract only (extracts only files with matching patterns) 2. clean after extract (removes files with matching patterns, after extract-all)')
 @click.option('--patterns', default=None, help='file path for line splitted list of patterns to match - e.g. .gitignore')
-@click.option('--threads', default=1, help='Threads count to utilize')
-@click.option('--total', default=None, help='max count limit to process.')
+@click.option('--threads', default=1, help='Threads count to utilize', type=click.INT)
+@click.option('--max', default=None, help='max count limit to process.', type=click.INT)
 @click.option('--targetdir', help='Target directory')
-def main(index, mode, patterns, threads, total, targetdir):
+def main(index, mode, patterns, threads, max, targetdir):
     settings.set_unarchives_dir(targetdir)
     archives = read_index_from_file(index)
     global indexer
-    indexer = Indexer(basedir=settings.UNARCHIVES_DIR, init=True)
+    indexer = Indexer(basedir=targetdir, init=True)
     indexes = indexer.read_index(errors=True)
 
     _p = json.load(open(patterns))
     include = _p['include']
     exclude = _p['exclude']
 
-
+    total = len(archives)
     archives = list(set(archives) - set(indexes))
-    if total is not None:
-        archives = archives[:total]
+    if max is not None:
+        archives = archives[:max]
+
 
     progress_bar = tqdm(total=total, position=threads+4,
-                        leave=True, initial=len(archives))
+                        leave=True, initial=len(indexes))
 
     pool = Pool(threads)
 

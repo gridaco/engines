@@ -4,9 +4,16 @@
     "**/*.tsx",
     "**/*.js",
     "**/*.jsx",
-    "**/*.json"
+    "**/*.css",
+    "**/*.scss",
+    "**/*.html",
+    "**/package.json",
+    "**/*.md",
+    "LICENSE"
   ],
-  "exclide": [
-    "node_modules"
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
   ]
 }
