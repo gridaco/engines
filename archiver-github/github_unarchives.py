@@ -136,7 +136,7 @@ def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude):
         tqdm.write("extracted: " + archive)
         indexer.add(archive)
     except Exception as e:
-        tqdm.write(e)
+        tqdm.write(str(e))
         indexer.add_error(archive)
     progress_bar.update(1)
 
