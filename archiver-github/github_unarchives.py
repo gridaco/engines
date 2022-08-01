@@ -35,9 +35,9 @@ def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
         # should not match any of in exclude (fnmatch)
         # should match at least one of in include (fnmatch)
         return not any(fnmatch.fnmatch(name, pattern) for pattern in exclude) and \
-                        any(fnmatch.fnmatch(name, pattern) for pattern in include)
+            any(fnmatch.fnmatch(name, pattern) for pattern in include)
 
-    if type == 'application/gzip':
+    if type == 'application/gzip' or type == "application/x-gzip":
         file = tarfile.open(file, 'r:gz')
         # extract only files with matching patterns
         targets = [name for name in file.getnames() if matches(name)]
@@ -51,7 +51,6 @@ def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
             os.rename(old_path, new_path)
         file.close()
         return True
-
 
     if type == 'application/zip':
         with zipfile.ZipFile(file, 'r') as zip_ref:
@@ -69,7 +68,9 @@ def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
                 os.rename(old_path, new_path)
 
             file.close()
+        return True
 
+    raise Exception("unsupported file type: " + type + " " + file)
 
 
 def unzip_file(file, dir, name=None, remove=False, cleaner=None):
@@ -122,11 +123,17 @@ def unzip_file(file, dir, name=None, remove=False, cleaner=None):
 
 
 def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude):
+    file = path.join(archives_dir, archive + ".zip")
+    if not os.path.exists(file):
+        # this is a temporary block. the archives dir may not contain all archives since the archives files are fragmented through various directories. this command may still be called while the merge.py is working. so we are not adding file not found to error, safely exist.
+        return
+
     try:
         org = archive.split('/')[0]
         name = archive.split('/')[-1]
-        file = path.join(archives_dir, archive + ".zip")
-        extract_only(file=file, dir=path.join(unarchives_dir, org), include=include, exclude=exclude, name=name)
+        extract_only(file=file, dir=path.join(unarchives_dir, org),
+                     include=include, exclude=exclude, name=name)
+        tqdm.write("extracted: " + archive)
         indexer.add(archive)
     except Exception as e:
         tqdm.write(e)
@@ -158,7 +165,6 @@ def main(index, mode, patterns, threads, max, targetdir):
     archives = list(set(archives) - set(indexes))
     if max is not None:
         archives = archives[:max]
-
 
     progress_bar = tqdm(total=total, position=4,
                         leave=True, initial=len(indexes))
