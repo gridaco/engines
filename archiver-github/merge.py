@@ -30,7 +30,11 @@ def main(source, target, clear):
                 shutil.copy(os.path.join(source, org, file),
                             os.path.join(target, org, file))
                 if clear:
+                    # remove source archive file
                     os.remove(os.path.join(source, org, file))
+                    # if the directory is empty, delete it as well
+                    if not os.listdir(os.path.join(source, org)):
+                        os.rmdir(os.path.join(source, org))
 
         pbar.update(1)
 
