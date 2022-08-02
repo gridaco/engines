@@ -7,17 +7,19 @@ import csv  # TODO: make with csv
 
 
 class Indexer:
-    def __init__(self, basedir, init=False) -> None:
+    def __init__(self, basedir, key="index", errkey="index-errors", init=False) -> None:
         self.basedir = basedir
+        self.key = key
+        self.errkey = errkey
         if init:
             self.create_index_if_not_exists()
         self.f = open(self.index_file_dir(), 'a')
 
     def index_file_dir(self):
-        return path.join(self.basedir, 'index')
+        return path.join(self.basedir, self.key)
     
     def errors_index_file_dir(self):
-        return path.join(self.basedir, 'index-errors')
+        return path.join(self.basedir, self.errkey)
 
     def add_error(self, repo):
         with open(self.errors_index_file_dir(), 'a') as f:

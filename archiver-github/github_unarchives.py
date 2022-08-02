@@ -119,7 +119,7 @@ def unzip_file(file, dir, name=None, remove=False, cleaner=None):
     if remove:
         os.remove(file)
 
-    return True
+    return {'final_path': final_path, 'type': type}
 
 
 def proc(archive, progress_bar, archives_dir, unarchives_dir, include, exclude):

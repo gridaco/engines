@@ -144,7 +144,7 @@ def proc(repo, progress_bar, archives_dir, extract, max_zip_size=None):
 def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives):
     set_archives_dir(dir_archives)
     global indexer
-    indexer = Indexer(settings.ARCHIVES_DIR, init=True)
+    indexer = Indexer(basedir=settings.ARCHIVES_DIR, init=True)
     print(f':: archives dir: {settings.ARCHIVES_DIR}')
     
 
