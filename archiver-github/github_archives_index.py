@@ -1,4 +1,5 @@
 from time import time
+import click
 from tqdm import tqdm
 from os import path
 import os
@@ -122,7 +123,11 @@ def indexArchives(basedir):
     print(
         f'New: Indexing.. Total: {len(repos)} repos. (was {before}) (took {_t_2 - _t_1} seconds)')
 
+@click.command()
+@click.option('--dir', default=settings.ARCHIVES_DIR, help='archives dir to index')
+def main(dir):
+    indexArchives(basedir=dir)
+
 
 if __name__ == '__main__':
-    print('reading from..', settings.ARCHIVES_DIR)
-    indexArchives(basedir=settings.ARCHIVES_DIR)
+    main()
