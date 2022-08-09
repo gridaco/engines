@@ -36,79 +36,125 @@ def read_meta(path):
         return None
 
 
-def remove_redunant_files(path, recursive=True, log=False):
+patterns_graphics = [
+    '*.png',
+    '*.jpg',
+    '*.jpeg',
+    '*.gif',
+    '*.gif',
+    '*.ico',
+    '*.svg',
+    '*.webp',
+    '*.webm',
+]
+
+patterns_zips = [
+    # zip
+    '*.zip',
+    '*.gz',
+    '*.bz2',
+    '*.7z',
+    '*.rar',
+    '*.tar',
+    '*.tgz',
+    '*.tbz2',
+    '*.tbz',
+    '*.tbz2',
+]
+
+patterns_videos = [
+    # videos
+    "*.mp4",
+    "*.mp3",
+    "*.mov",
+    "*.avi",
+    "*.flv",
+    "*.wmv",
+    "*.wav",
+]
+
+patterns_fonts = [
+    # fonts
+    "*.ttf",
+    "*.otf",
+    "*.woff",
+    "*.woff2",
+    "*.eot",
+]
+
+
+patterns_python_ignore = [
+    # python
+    '*.py',
+    '*.pyc',
+    '__pycache__',
+]
+
+
+patterns_db = [
+    # mongodb
+    'journal',
+    '*.wt',
+]
+
+
+patterns_node_ignore = [
+    'package-lock.json',
+    "node_modules",
+    '.firebase',
+    '.yarn',
+    '.next',
+    '.netlify',
+    'build',
+    'dist',
+    '*.lock',
+    "dist",
+]
+
+patterns_misc = [
+    # meta
+    '.github',
+    ".vscode",
+    '.DS_Store'
+]
+
+
+patterns_legacy_langs = [
+    '*.php',
+]
+
+patterns_size_optimized = patterns_graphics + patterns_zips + patterns_videos + \
+    patterns_fonts + patterns_python_ignore + patterns_db + patterns_node_ignore
+patterns_frontend_source_files_only = patterns_size_optimized + patterns_misc + [
+    # backend
+    'backend'
+] + patterns_legacy_langs
+
+
+def read_patterns(patterns):
+    # if patterns is path, read patterns from the file
+    if isinstance(patterns, str):
+        with open(patterns, 'r') as f:
+            # read each lines, trim, remove line starts with '#' and empty lines
+            patterns = [line.strip()
+                        for line in f if not line.startswith('#') and line.strip()]
+            f.close()
+            return patterns
+    else:
+        return patterns
+
+
+def remove_redunant_files(path, patterns=patterns_size_optimized, recursive=True, log=False):
     """
     Remove redunant files from the repository.
     print the removed files.
     """
-    remove = [
-        # graphics
-        '*.png',
-        '*.jpg',
-        '*.jpeg',
-        '*.gif',
-        '*.gif',
-        '*.ico',
-        '*.svg',
-        '*.webp',
-        '*.webm',
-        # zip
-        '*.zip',
-        '*.gz',
-        '*.bz2',
-        '*.7z',
-        '*.rar',
-        '*.tar',
-        '*.tgz',
-        '*.tbz2',
-        '*.tbz',
-        '*.tbz2',
-        # videos
-        "*.mp4",
-        "*.mp3",
-        "*.mov",
-        "*.avi",
-        "*.flv",
-        "*.wmv",
-        "*.wav",
-        # fonts
-        "*.ttf",
-        "*.otf",
-        "*.woff",
-        "*.woff2",
-        "*.eot",
-        # python
-        '*.py',
-        '*.pyc',
-        '__pycache__',
-        # backend
-        'backend',
-        # mongodb
-        'journal',
-        '*.wt',
-        # other lang
-        '*.php',
-        # meta
-        'package-lock.json',
-        "node_modules",
-        '.firebase',
-        '.github',
-        '.yarn',
-        '.next',
-        '.netlify',
-        'build',
-        'dist',
-        '*.lock',
-        "dist",
-        ".vscode",
-        '.DS_Store',
-    ]
 
-    # sort dirs > files (file = ends with extension)
-    remove.sort(
-        key=lambda x: x.endswith('.*')
-    )
-
+    patterns = read_patterns(patterns)
+    # sort dirs to be first than files (file = ends with extension \.(.*?))
+    # [dir, file.x, dir2, file.y] -> [dir, dir2, file.x, file.y]
+    patterns = sorted(patterns, key=lambda x: x.endswith(
+        r'\.(.*?)'), reverse=True)
 
     if read_meta(path) is not None:
         if log:
@@ -121,12 +167,13 @@ def remove_redunant_files(path, recursive=True, log=False):
         tqdm.write(f'Removing redunant files from {path} - ({size_1}bytes)')
 
     removed = []
-    for pattern in remove:
+    for pattern in patterns:
         try:
-            for file in glob.glob(os.path.join(path, '**/' + pattern), recursive=recursive):
+            for file in glob.iglob(os.path.join(path, '**/' + pattern), recursive=recursive):
                 # if directory, remove it
                 if os.path.isdir(file):
                     shutil.rmtree(file, ignore_errors=True)
+                    removed.append(file)
                 else:
                     try:
                         os.remove(file)

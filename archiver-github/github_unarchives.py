@@ -10,7 +10,6 @@ from tqdm import tqdm
 from functools import partial
 from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool
-from github_unarchives_sanitize import remove_redunant_files
 from github_archives_index import read_index_from_file, Indexer
 import settings
 
