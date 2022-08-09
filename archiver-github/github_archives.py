@@ -136,10 +136,10 @@ def proc(repo, progress_bar, archives_dir, extract, max_zip_size=None):
               help='json file path containing the list of repositories')
 @click.option('--total', default=None, help='max count limit from the input file.')
 @click.option('--key', default='id', help='key to the repository org/name data in the input file.')
-@click.option('--skip-index', default=False, help='skips initial directory indexing if true.')
+@click.option('--skip-index', type=click.BOOL, prompt='skip index?', default=False, help='skips initial directory indexing if true.')
 @click.option('--threads', default=cpu_count(), help='threads count to use.')
 @click.option('--max-zip-size', default=None, help='limit the max zip size per request. (mb)', type=int)
-@click.option('--extract', default=True, help='rather to extract file after download zip', type=bool)
+@click.option('--extract', default=False, help='rather to extract file after download zip', type=bool)
 @click.option('--dir-archives', default=settings.ARCHIVES_DIR, help='archives dir settings override')
 def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives):
     set_archives_dir(dir_archives)
@@ -149,7 +149,7 @@ def main(f, total, key, threads, skip_index, extract, max_zip_size, dir_archives
     
 
     if skip_index is False:
-        indexArchives()  # before starting
+        indexArchives(dir_archives)  # before starting
 
     repo_set = [x[key]
                 for x in json.load(open(f))]

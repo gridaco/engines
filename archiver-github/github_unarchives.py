@@ -38,18 +38,18 @@ def extract_only(file, dir, include: list[str], exclude: list[str], name=None):
             any(fnmatch.fnmatch(name, pattern) for pattern in include)
 
     if type == 'application/gzip' or type == "application/x-gzip":
-        file = tarfile.open(file, 'r:gz')
+        tar = tarfile.open(file, 'r:gz')
         # extract only files with matching patterns
-        targets = [name for name in file.getnames() if matches(name)]
+        targets = [name for name in tar.getnames() if matches(name)]
         for target in targets:
-            file.extract(target, dir)
+            tar.extract(target, dir)
 
         if name is not None:
             old_path = path.join(
-                dir, os.path.commonprefix(file.getnames()))
+                dir, os.path.commonprefix(tar.getnames()))
             new_path = path.join(dir, name)
             os.rename(old_path, new_path)
-        file.close()
+        tar.close()
         return True
 
     if type == 'application/zip':
@@ -81,11 +81,11 @@ def unzip_file(file, dir, name=None, remove=False, cleaner=None):
     if type == 'application/gzip':
         try:
             # tar.gz if via wget
-            file = tarfile.open(file, 'r:gz')
-            old_path = path.join(dir, os.path.commonprefix(file.getnames()))
+            tar = tarfile.open(file, 'r:gz')
+            old_path = path.join(dir, os.path.commonprefix(tar.getnames()))
             final_path = old_path
-            file.extractall(dir)
-            file.close()
+            tar.extractall(dir)
+            tar.close()
             if name is not None:
                 new_path = path.join(dir, name)
                 final_path = new_path

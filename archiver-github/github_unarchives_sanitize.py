@@ -83,6 +83,9 @@ def remove_redunant_files(path, recursive=True, log=False):
         '__pycache__',
         # backend
         'backend',
+        # mongodb
+        'journal',
+        '*.wt',
         # other lang
         '*.php',
         # meta
@@ -100,6 +103,12 @@ def remove_redunant_files(path, recursive=True, log=False):
         ".vscode",
         '.DS_Store',
     ]
+
+    # sort dirs > files (file = ends with extension)
+    remove.sort(
+        key=lambda x: x.endswith('.*')
+    )
+
 
     if read_meta(path) is not None:
         if log:
