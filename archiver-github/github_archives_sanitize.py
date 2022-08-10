@@ -57,6 +57,12 @@ def proc(repo: str, indir: str, indexer: Indexer.Indexer, pbar: tqdm, minsize, o
     tmp = os.path.join(tmp, org)
     out = os.path.join(outdir, org, name + '.zip')
 
+    # if file not exist, skip it
+    if not os.path.exists(file):
+        # this is a indexer problem. this should not be happening in the first place
+        pbar.update(1)
+        return
+
     def skipper_min_size(size):
         minsizemib = minsize * mb
         return size <= minsizemib
