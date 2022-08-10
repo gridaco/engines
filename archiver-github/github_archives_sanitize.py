@@ -26,6 +26,9 @@ def sanitize_archive(file, tmp, out, skipcb, remove_patterns):
         return {'sizediff': 0}
 
     _ = unzip_file(file=file, dir=tmp, remove=True)
+    if _ is False:
+        raise Exception('malforned archive: ' + file)
+
     path = _['final_path']
     mtype = _['type']
 
