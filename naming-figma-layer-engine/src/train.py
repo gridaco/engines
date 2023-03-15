@@ -41,8 +41,8 @@ class FigmaDataset(Dataset):
     def process_record(record):
 
         el_str = f"EL: {record['el']} "
-        # value_str = f"VALUE: {record['value']} " if record.get('value') else ""
-        input_features = f"{el_str}"
+        value_str = f"VALUE: {record['value']} " if record.get('value') else ""
+        input_features = f"{el_str}{value_str}"
 
         # Preprocess the record into a suitable format for the model
         # This should include tokenization, one-hot encoding, and other necessary conversions
