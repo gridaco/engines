@@ -1,6 +1,6 @@
-# Introducing **GRID** - Graphical Responsive Interface Designer
+# Introducing **GRIDA Engine** - Generative Responsive Interface Design Assistant
 
-GRID (Graphical Responsive Interface Designer) is an advanced AI-powered UI design assistant that streamlines the process of creating user interfaces. It combines state-of-the-art machine learning techniques with an intuitive user experience, enabling you to quickly and efficiently generate professional-quality UI designs, responsive layouts, and human-level frontend code.
+GRIDA (Generative Responsive Interface Design Assistant) is an advanced AI-powered UI design assistant that streamlines the process of creating user interfaces. It combines state-of-the-art machine learning techniques with an intuitive user experience, enabling you to quickly and efficiently generate professional-quality UI designs, responsive layouts, and human-level frontend code.
 
 ## Key Features
 
