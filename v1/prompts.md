@@ -1,5 +1,7 @@
 ## Prompts references
 
+### General
+
 - Design a minimalist login screen with email and password input fields.
 - Create a landing page for a travel agency with a search bar and a featured destinations carousel.
 - Design a mobile app screen for managing personal finances, including an expenses chart and a list of recent transactions.
@@ -100,3 +102,109 @@
 - Create a screen for a voice recording app with audio input, playback controls, and file management.
 - Design a screen for a smart city app with information on public services, events, and transportation.
 - Create a screen for a geocaching app with cache locations, hints, and user logs.
+
+### Difficulty - Extreme
+
+- Design a screen for a multiplayer strategy game with a 3D world map, real-time troop movement, and chat functionality.
+- Create a screen for an AI-driven video editing app with scene detection, automated cuts, and customizable transitions.
+- Design a screen for an augmented reality city guide app with live navigation, points of interest, and interactive 3D models.
+- Create a screen for a biometric security app with facial recognition, fingerprint scanning, and multi-factor authentication options.
+- Design a screen for a quantum computing simulation app with a visual representation of qubits, gates, and entanglement.
+- Create a screen for a molecular biology research app with 3D protein visualization, data analysis tools, and collaborative features.
+- Design a screen for an advanced robotics control app with customizable movements, sensor data, and machine learning capabilities.
+- Create a screen for a space exploration app with a real-time solar system model, mission planning, and scientific data analysis.
+- Design a screen for a financial risk assessment app using AI-generated predictions, multiple scenario analyses, and stress testing.
+- Create a screen for a smart city traffic management app with real-time congestion monitoring, dynamic routing, and incident reporting.
+- Design a screen for a brain-computer interface app with neural signal visualization, activity mapping, and mental command execution.
+- Create a screen for a digital art marketplace with AI-curated collections, artist profiles, and blockchain-based provenance tracking.
+- Design a screen for a virtual reality surgical training app with haptic feedback, realistic patient models, and performance evaluation.
+- Create a screen for an energy management app with predictive analytics, real-time consumption data, and AI-driven optimization.
+- Design a screen for a global supply chain management app with AI-driven forecasting, real-time tracking, and risk analysis.
+- Create a screen for an intelligent tutoring app with personalized learning paths, real-time feedback, and adaptive assessments.
+- Design a screen for a natural disaster prediction app with AI-generated forecasts, hazard maps, and emergency planning tools.
+- Create a screen for a quantum-resistant cryptography app with key generation, encryption/decryption tools, and secure communication.
+- Design a screen for an AI-driven fashion design app with generative design algorithms, trend analysis, and material optimization.
+- Create a screen for a climate change modeling app with AI-generated projections, mitigation strategies, and policy impact analysis.
+- Design a screen for a neural network visualization app with interactive layer representations, activation maps, and model performance metrics.
+- Create a screen for a bioinformatics app with DNA sequencing data, gene editing tools, and AI-driven genomic analysis.
+- Design a screen for a deepfake detection app with video analysis, authenticity scoring, and AI-driven forensic tools.
+- Create a screen for a self-driving car control app with real-time sensor data, route planning, and vehicle diagnostics.
+- Design a screen for a human-robot collaboration app with task allocation, real-time status updates, and safety features.
+- Create a screen for an AI-driven drug discovery app with molecular docking simulations, toxicity predictions, and clinical trial management.
+- Design a screen for a smart agriculture app with AI-driven crop monitoring, irrigation optimization, and pest control recommendations.
+- Create a screen for a virtual reality architecture app with interactive 3D building models, material selection, and lighting simulation.
+- Design a screen for a wildlife conservation app with AI-driven species identification, habitat monitoring, and threat analysis.
+- Create a screen for a personalized medicine app with AI-generated treatment recommendations, genetic analysis, and patient monitoring.
+- Design a screen for an AI-driven music composition app with melody generation, harmonization, and arrangement tools.
+- Create a screen for a gesture recognition app with real-time hand tracking, gesture library, and custom gesture creation.
+- Design a screen for an adaptive cybersecurity app with AI-driven threat detection, real-time alerts, and incident response planning.
+- Create a screen for a virtual reality therapy app with immersive environments, guided sessions, and personalized treatment plans.
+- Design a screen for a predictive maintenance app with equipment health monitoring, anomaly detection, and AI-driven repair suggestions.
+- Create a screen for an emotion recognition app with facial expression analysis, voice sentiment analysis, and real-time feedback.
+- Design a screen for a smart home energy management app with AI-driven optimization, consumption tracking, and renewable energy integration.
+- Create a screen for an AI-generated news app with personalized content curation, fact-checking, and sentiment analysis.
+- Design a screen for a quantum communication app with secure key distribution, quantum encryption, and real-time messaging.
+- Create a screen for a holographic display app with 3D object visualization, interactive controls, and real-time rendering.
+- Design a screen for a nanotechnology app with molecular manipulation tools, simulation environments, and AI-driven design optimization.
+- Create a screen for an AI-driven language learning app with personalized lessons, conversational practice, and cultural insights.
+- Design a screen for a virtual reality job training app with immersive simulations, skill assessments, and feedback loops.
+- Create a screen for an AI-generated content marketing app with topic suggestions, keyword research, and performance analytics.
+- Design a screen for a smart manufacturing app with AI-driven process optimization, quality control, and predictive analytics.
+- Create a screen for a virtual reality history app with immersive reconstructions, guided tours, and interactive learning experiences.
+- Design a screen for an AI-driven sports coaching app with personalized training plans, performance analysis, and injury prevention.
+- Create a screen for a virtual reality meditation app with immersive environments, guided sessions, and biofeedback integration.
+- Design a screen for an AI-generated recipe app with personalized meal suggestions, ingredient analysis, and dietary preferences.
+- Create a screen for an AI-driven fashion trend prediction app with style analysis, forecasting algorithms, and consumer insights.
+
+## Difficulty - Easy
+
+- Design a screen for a weather app with temperature, humidity, and precipitation forecasts.
+- Create a screen for a note-taking app with a text editor, folder organization, and search functionality.
+- Design a screen for a to-do list app with task input, due dates, and completion checkboxes.
+- Create a screen for a calculator app with basic arithmetic functions, history, and memory storage.
+- Design a screen for a stopwatch app with start, pause, and reset buttons, and a lap time recorder.
+- Create a screen for a calendar app with monthly, weekly, and daily views, and event creation.
+- Design a screen for a unit converter app with categories, input fields, and output fields.
+- Create a screen for a dictionary app with search functionality, word definitions, and synonyms.
+- Design a screen for a timer app with duration input, start and pause buttons, and customizable alerts.
+- Create a screen for a currency converter app with currency selection, input fields, and real-time exchange rates.
+- Design a screen for a recipe app with recipe lists, ingredients, and step-by-step instructions.
+- Create a screen for a news app with article previews, categories, and a search bar.
+- Design a screen for a contacts app with a list of contacts, details, and the option to add new contacts.
+- Create a screen for a music player app with a playlist, playback controls, and volume adjustment.
+- Design a screen for a photo gallery app with thumbnail previews, sorting options, and sharing functionality.
+- Create a screen for a shopping list app with item input, categories, and item checkboxes.
+- Design a screen for a fitness tracker app with step count, distance, and calories burned.
+- Create a screen for a meditation app with a timer, guided sessions, and ambient soundscapes.
+- Design a screen for a movie recommendation app with movie posters, ratings, and genre filters.
+- Create a screen for a book review app with book covers, ratings, and user reviews.
+- Design a screen for a podcast app with episode lists, playback controls, and subscription management.
+- Create a screen for a language learning app with flashcards, quizzes, and pronunciation practice.
+- Design a screen for a workout app with exercise demonstrations, workout plans, and progress tracking.
+- Create a screen for a budgeting app with expense categories, transaction input, and spending analysis.
+- Design a screen for a social media app with a newsfeed, profile management, and messaging.
+- Create a screen for a travel planning app with destination suggestions, itineraries, and booking options.
+- Design a screen for a dating app with profile previews, swiping functionality, and messaging.
+- Create a screen for a file storage app with folder organization, file previews, and sharing options.
+- Design a screen for a weather radar app with map visualization, zoom controls, and weather layers.
+- Create a screen for a public transportation app with route planning, schedule information, and real-time updates.
+- Design a screen for a restaurant finder app with location-based recommendations, filters, and user reviews.
+- Create a screen for a step-by-step tutorial app with images, text descriptions, and progress tracking.
+- Design a screen for a daily planner app with task input, scheduling options, and reminders.
+- Create a screen for a learning management system with course listings, progress tracking, and assessments.
+- Design a screen for a video player app with playback controls, video library, and subtitles.
+- Create a screen for an event planning app with guest lists, budget management, and task assignments.
+- Design a screen for a time management app with time tracking, project organization, and productivity analysis.
+- Create a screen for a habit tracker app with habit input, streak tracking, and daily reminders.
+- Design a screen for a nutrition tracking app with food logging, macro breakdowns, and daily goals.
+- Create a screen for a personal finance app with account balances, transaction history, and budgeting tools.
+- Design a screen for a job search app with job listings, filters, and application management.
+- Create a screen for a clothing shopping app with product previews, categories, and a shopping cart.
+- Design a screen for a live sports scores app with real-time updates, team information, and game schedules.
+- Create a screen for a document scanner app with camera integration, cropping tools, and OCR capabilities.
+- Design a screen for a parking app with location-based parking spot availability, pricing, and navigation.
+- Create a screen for a home security app with live camera feeds, alarm controls, and notifications.
+- Design a screen for a sleep tracking app with sleep stages, duration, and nightly insights.
+- Create a screen for a pet care app with feeding reminders, health tracking, and vet appointment scheduling.
+- Design a screen for a voice assistant app with voice input, command suggestions, and device integration.
+- Create a screen for a local attractions app with points of interest, user reviews, and navigation options.
