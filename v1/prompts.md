@@ -1,0 +1,102 @@
+## Prompts references
+
+- Design a minimalist login screen with email and password input fields.
+- Create a landing page for a travel agency with a search bar and a featured destinations carousel.
+- Design a mobile app screen for managing personal finances, including an expenses chart and a list of recent transactions.
+- Create a dashboard for a project management tool with a summary of tasks, team members, and deadlines.
+- Design a product detail page for an e-commerce website, displaying images, price, and a call-to-action button.
+- Create a profile screen for a social media app, showcasing the user's profile picture, name, and post grid.
+- Design a restaurant reservation screen with a date picker, time selector, and a number of guests input field.
+- Create a weather app screen displaying the current temperature, weather conditions, and a 5-day forecast.
+- Design a workout tracking app screen with exercise types, duration, and a progress bar.
+- Create a screen for a meditation app with a selection of guided sessions and a timer.
+- Design a podcast app screen displaying a list of episodes, play controls, and show description.
+- Create a news app homepage with trending stories, categories, and a search bar.
+- Design an event ticket purchasing screen with seat selection, ticket quantity, and payment options.
+- Create a real estate app screen with property listings, map view, and filters.
+- Design a recipe app screen with ingredients list, preparation steps, and a cooking timer.
+- Create a language learning app screen with daily goals, progress tracking, and lesson categories.
+- Design a job search app screen with a list of available positions, company logos, and filters.
+- Create a dating app screen displaying user profiles, swipe gestures, and a chat button.
+- Design a photo editing app screen with various tools, filters, and crop options.
+- Create a music streaming app screen with a playlist, album art, and play controls.
+- Design a live sports scores app screen with match updates, team logos, and statistics.
+- Create a to-do list app screen with task input, priority levels, and deadline reminders.
+- Design a contact management app screen with a list of contacts, search functionality, and profile details.
+- Create a document collaboration app screen with real-time editing, comments, and version history.
+- Design a smart home control app screen with icons for lights, temperature, and security.
+- Create a file storage app screen with folder navigation, file previews, and sharing options.
+- Design a cryptocurrency trading app screen with a price chart, buy/sell buttons, and wallet balance.
+- Create a ride-hailing app screen with a pickup location, destination input, and vehicle options.
+- Design an e-learning app screen with course categories, progress tracking, and quizzes.
+- Create a fashion app screen displaying a curated outfit with product details and shopping links.
+- Design a movie streaming app screen with a video player, movie details, and related content suggestions.
+- Create a screen for a customer support chatbot with conversation history and a message input field.
+- Design a travel planning app screen with destination suggestions, budget tracking, and itinerary creation.
+- Create a screen for a health tracking app, displaying daily steps, calories burned, and sleep analysis.
+- Design a gaming app store screen with featured games, top charts, and a search bar.
+- Create a screen for a virtual reality app with a 3D environment, navigation controls, and object interaction.
+- Design a screen for a car rental app with vehicle options, pickup/drop-off locations, and date selection.
+- Create a screen for a note-taking app with a list of notes, categorization,
+- Design a screen for a video conferencing app with participant tiles, mute controls, and screen sharing options.
+- Create a screen for a book reading app with adjustable font size, chapter navigation, and bookmarks.
+- Design a crowdfunding app screen with project information, funding progress, and pledge options.
+- Create a screen for a meal planning app with daily meal suggestions, grocery lists, and nutritional information.
+- Design a screen for a time tracking app with a list of projects, timers, and daily goals.
+- Create a screen for an art gallery app with a collection of artworks, artist information, and purchase options.
+- Design a screen for a public transportation app with route planning, departure times, and fare information.
+- Create a screen for a loyalty rewards app with a points balance, redeemable rewards, and transaction history.
+- Design a screen for a voice assistant app with voice input, conversation history, and suggested actions.
+- Create a screen for a mood tracking app with daily check-ins, mood trends, and journal entries.
+- Design a screen for a budgeting app with income sources, spending categories, and savings goals.
+- Create a screen for a pet adoption app with available pets, search filters, and adoption application forms.
+- Design a screen for an event planning app with a guest list, budget tracker, and venue information.
+- Create a screen for a TV show tracking app with episode lists, show details, and progress tracking.
+- Design a screen for a stock trading app with market data, portfolio tracking, and trade execution.
+- Create a screen for a group messaging app with conversation threads, contact lists, and media sharing.
+- Design a screen for a volunteer coordination app with available opportunities, location filters, and event details.
+- Create a screen for a personal assistant app with a task list, calendar, and reminders.
+- Design a screen for a ticket management app with event details, seating charts, and purchase options.
+- Create a screen for a local business directory app with a list of businesses, ratings, and contact information.
+- Design a screen for a nutrition tracking app with daily food intake, macronutrient breakdown, and meal suggestions.
+- Create a screen for a parenting app with child growth tracking, milestone achievements, and expert advice.
+- Design a screen for a productivity app with focus timer, goal setting, and daily habits.
+- Create a screen for a shopping list app with item categories, price tracking, and store selection.
+- Design a screen for a music production app with audio tracks, instrument selection, and mixing controls.
+- Create a screen for a museum guide app with exhibit information, interactive map, and audio tours.
+- Design a screen for a habit tracking app with daily goals, streaks, and motivational quotes.
+- Create a screen for a conference app with event schedule, speaker profiles, and networking features.
+- Design a screen for a gift recommendation app with gift ideas, personalized suggestions, and purchase options.
+- Create a screen for a fashion design app with color palettes, fabric choices, and pattern libraries.
+- Design a screen for a language translation app with text input, language selection, and spoken translations.
+- Create a screen for a workout challenge app with daily exercise routines, progress tracking, and leaderboards.
+- Design a screen for a trivia app with multiple choice questions, scoring, and category selection.
+- Create a screen for a wine tasting app with wine profiles, flavor notes, and pairing suggestions.
+- Design a screen for a plant care app with watering schedules, growth tracking, and care tips.
+- Create a screen for a wedding planning app with budget management, vendor lists, and inspiration
+- Design a screen for a sleep tracking app with sleep quality analysis, bedtime reminders, and tips for better sleep.
+- Create a screen for a home inventory app with item categories, photos, and purchase history.
+- Design a screen for a customer relationship management (CRM) app with client profiles, activity tracking, and deal stages.
+- Create a screen for a code learning app with tutorials, quizzes, and a built-in code editor.
+- Design a screen for a yoga app with pose sequences, personalized programs, and progress tracking.
+- Create a screen for a freelance marketplace app with available jobs, search filters, and proposal submission.
+- Design a screen for an interior design app with room layouts, furniture catalogs, and color schemes.
+- Create a screen for a travel bucket list app with destination suggestions, cost estimations, and trip planning.
+- Design a screen for a remote work collaboration app with task assignments, file sharing, and team communication.
+- Create a screen for a daily horoscope app with zodiac sign selection, personalized predictions, and compatibility readings.
+- Design a screen for a coffee shop finder app with nearby locations, ratings, and user reviews.
+- Create a screen for a parking app with available spaces, location filters, and reservation options.
+- Design a screen for a DIY project app with step-by-step instructions, material lists, and progress tracking.
+- Create a screen for a talent management app with audition listings, portfolio management, and bookings.
+- Design a screen for a comic book reader app with a library, page navigation, and zoom controls.
+- Create a screen for a running app with route mapping, pace tracking, and personalized coaching.
+- Design a screen for a virtual reality art gallery with 3D navigation, exhibit information, and artist profiles.
+- Create a screen for a bird watching app with species identification, sighting logs, and location mapping.
+- Design a screen for a personal stylist app with outfit suggestions, wardrobe management, and shopping links.
+- Create a screen for a mental health app with therapy sessions, mood tracking, and coping strategies.
+- Design a screen for a drawing app with a canvas, color palettes, and brush settings.
+- Create a screen for a guided tour app with audio commentary, interactive maps, and points of interest.
+- Design a screen for a habit-building app with goal setting, progress tracking, and motivational prompts.
+- Create a screen for a voice recording app with audio input, playback controls, and file management.
+- Design a screen for a smart city app with information on public services, events, and transportation.
+- Create a screen for a geocaching app with cache locations, hints, and user logs.
