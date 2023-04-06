@@ -1,46 +1,60 @@
 import os
-import torch
+import json
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-
-MODEL_NAME = os.path.join(os.path.dirname(__file__), "../data/models/???")
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
+import torch.nn.functional as F
+import torch
 
 
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "../data/models")
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_PATH)
 
+def get_name_and_confidence(properties, model, tokenizer):
+    # Encode the input properties
 
-def generate_layer_names(properties, model, tokenizer, top_k=5):
-    input_text = "Properties: "
-    for key, value in properties.items():
-        input_text += f"{key}: {value} "
+    # get the 'type' property
+    _el = properties['type']
+    # remove the 'type' property
+    del properties['type']
+
+    _value = json.dumps(properties).replace("{", "").replace("}", "")
+
+    input_text = f"EL: {_el} VALUE: {_value} "
 
     input_ids = tokenizer.encode(input_text, return_tensors="pt")
-    
-    # Generate predictions
-    with torch.no_grad():
-        outputs = model.generate(input_ids, num_return_sequences=top_k, num_beams=top_k, temperature=0.7)
 
-    # Decode the predicted layer names
-    predicted_names = [tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
+    # Create an array of decoder_input_ids filled with the decoder_start_token_id
+    decoder_input_ids = torch.full(
+        (input_ids.shape[0], model.config.max_length),
+        model.config.decoder_start_token_id,
+        dtype=torch.long
+    )
 
-    # Calculate confidence scores
+    # Run the forward pass
+    outputs = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids)
+
+    # Extract the logits and apply softmax
     logits = outputs.logits
-    probs = torch.softmax(logits, dim=-1)
-    top_probs, _ = torch.topk(probs, top_k, dim=-1)
-    confidence_scores = top_probs.mean(dim=-1).tolist()
+    softmax_logits = F.softmax(logits, dim=-1)
 
-    # Return the layer names along with their confidence scores
-    return list(zip(predicted_names, confidence_scores))
+    # Get the predicted token ids and confidence
+    predicted_token_ids = torch.argmax(softmax_logits, dim=-1)
+    confidence = softmax_logits.max().item()
+
+    # Decode the output sequence
+    new_name = tokenizer.decode(predicted_token_ids[0], skip_special_tokens=False)
+
+    return new_name, confidence
 
 
 if __name__ == "__main__":
 
   properties = {
-      "color": "red",
-      "background": "white",
-      "width": "100px",
-      "height": "50px",
+    "type": "div",
+    "width": "1px",
+    "height": "50px",
+    "padding": "10px",
   }
 
-  layer_names_with_confidence = generate_layer_names(properties, model, tokenizer)
+  layer_names_with_confidence = get_name_and_confidence(properties, model, tokenizer)
   print(layer_names_with_confidence)
