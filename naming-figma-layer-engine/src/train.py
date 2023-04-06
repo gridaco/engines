@@ -109,6 +109,9 @@ progress_bar = TQDMProgressBar()
 trainer = pl.Trainer(max_epochs=10, callbacks=[progress_bar])
 trainer.fit(model, data_module)
 
+MODEL_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../data/models/")
+
 # Save the trained model
-model.seq2seq.save_pretrained(
-    os.path.join(os.path.abspath(os.path.dirname(__file__)), "../data/models/"))
+model.seq2seq.save_pretrained(MODEL_PATH)
+
+tokenizer.save_pretrained(MODEL_PATH)
