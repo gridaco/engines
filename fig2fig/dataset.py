@@ -69,21 +69,27 @@ target_features = [
 ]
 
 class NodesDB:
-    def __init__(self, db_path):
+    def __init__(self, db_path, max, max_depth):
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
         self.column_names = self.get_column_names()
+        self.max = max
+        self.max_depth = max_depth
 
     def get_column_names(self):
         self.cursor.execute("PRAGMA table_info(nodes)")
         return [column_info[1] for column_info in self.cursor.fetchall()]
 
     def get_sample_count(self):
-        self.cursor.execute("SELECT COUNT(*) FROM nodes")
-        return self.cursor.fetchone()[0]
+        if self.max_depth is None:
+            self.cursor.execute("SELECT COUNT(*) FROM nodes")
+        else:
+            self.cursor.execute(f"SELECT COUNT(*) FROM nodes WHERE depth <= {self.max_depth}")
+        count = self.cursor.fetchone()[0]
+        return min(count, self.max) if self.max else count
 
     def get_sample(self, idx):
-        self.cursor.execute(f"SELECT * FROM nodes WHERE rowid={idx + 1}")
+        self.cursor.execute(f"SELECT * FROM nodes WHERE depth <= {self.max_depth} LIMIT 1 OFFSET {idx}")
         row = self.cursor.fetchone()
         if row:
             return dict(zip(self.column_names, row))
@@ -97,8 +103,8 @@ class NodesDB:
         return None
 
 class FigmaNodesDataset(Dataset):
-    def __init__(self, db):
-        self.nodes_db = NodesDB(db)
+    def __init__(self, db, max, max_depth):
+        self.nodes_db = NodesDB(db, max, max_depth)
 
         self.num_samples = self.nodes_db.get_sample_count()
         print(f"Loaded {self.num_samples} samples")
@@ -279,10 +285,11 @@ def safe_loads(s):
 @click.argument("db", type=click.Path(exists=True, file_okay=True, dir_okay=False), required=True)
 @click.option("--checkpoint", type=click.Path(file_okay=False), required=False, default='./checkpoints/')
 @click.option("--max", type=click.INT, required=False, default=None)
-def main(db, checkpoint, max):
+@click.option("--depth", type=click.INT, required=False, default=None)
+def main(db, checkpoint, max, depth):
     db = Path(db)
     checkpoint = Path(checkpoint)
-    dataset = FigmaNodesDataset(db)
+    dataset = FigmaNodesDataset(db, max=max, max_depth=depth)
 
     file = checkpoint / f"{db.stem}.pth"
     dataset.save_tensors(file, max=max)
