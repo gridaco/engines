@@ -1,11 +1,18 @@
+import json
+import os
+from pathlib import Path
 import numpy as np
 
-def normalize_type(_type):
-    """
-    Normalize the type of a node
-    """
+# current directory
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+# font-fallbacks-map.json
+font_fallbacks_map: dict = json.load(Path(__dir__ / 'font-fallbacks-map.json').open())
 
-    map = {
+def encode_type(_type):
+    """
+    Encode a type into a one-hot vector
+    """
+    mapping = {
         'FRAME': 'CONTAINER',
         'GROUP': 'CONTAINER',
         'INSTANCE': 'CONTAINER',
@@ -16,24 +23,112 @@ def normalize_type(_type):
         'LINE': 'SHAPE',
         'VECTOR': 'SHAPE',
         'STAR': 'SHAPE',
-        'TEXT': 'TEXT',
         'BOOLEAN_OPERATION': 'SHAPE',
+        'TEXT': 'TEXT',
+    }
+    # changing the order of the categories will break the model
+    categories = ['OTHER', 'CONTAINER', 'SHAPE', 'TEXT']
+    return encode_onehot(mapping.get(_type, 'OTHER'), categories)
+
+
+def encode_export_settings(export_settings):
+    """
+    Encode export settings into a one-hot vector
+    """
+    mapping = {
+        "PNG": "BITMAP",
+        "JPG": "BITMAP",
+        "SVG": "VECTOR",
+        "PDF": "VECTOR",
     }
 
-    return map.get(_type, _type)
+    # changing the order of the categories will break the model
+    categories = [None, 'BITMAP', 'VECTOR']
 
-def encode_type(_type):
+    return encode_onehot(mapping.get(export_settings), categories)
+
+
+def encode_font_weight(font_weight):
     """
-    Encode a type into a one-hot vector
+    Encode font weight into a one-hot vector
     """
-    categories = ['CONTAINER', 'SHAPE', 'TEXT']
+
+    # sometimes the font weight is 950, which is not in the list, so we need to round it.
+    font_weight = str(round(int(font_weight) / 100) * 100)
+
+    # changing the order of the categories will break the model
+    categories = [None, '100', '200', '300', '400', '500', '600', '700', '800', '900']
+    return encode_onehot(font_weight, categories)
+
+
+def encode_font_family(font_family):
+    """
+    Encode font family into a one-hot vector
+    This only supports google fonts
+    """
+
+    # fallback to sans-serif if font family is not found (in google fonts)
+    generic = font_fallbacks_map.get(font_family, "sans-serif")
+
+    # changing the order of the categories will break the model
+    categories = [
+        None,
+        "serif",
+        "sans-serif",
+        "monospace",
+        "cursive",
+        "fantasy",
+        "system-ui",
+        "ui-serif",
+        "ui-sans-serif",
+        "ui-monospace",
+        "ui-rounded",
+        "emoji",
+        "math",
+        "fangsong",
+    ]
     
+    return encode_onehot(generic, categories)
+
+
+def encode_font_style(font_style):
+    # changing the order of the categories will break the model
+    categories = [None, 'normal', 'italic']
+    return encode_onehot(font_style, categories)
+    ...
+
+def encode_text_align(text_align):
+    # changing the order of the categories will break the model
+    categories = [None, 'LEFT', 'RIGHT', 'CENTER', 'JUSTIFIED']
+    return encode_onehot(text_align, categories)
+
+def encode_text_align_vertical(text_align_vertical):
+    # changing the order of the categories will break the model
+    categories = [None, 'TOP', 'CENTER', 'BOTTOM']
+    return encode_onehot(text_align_vertical, categories)
+
+def encode_text_decoration(text_decoration):
+    # changing the order of the categories will break the model
+    categories = [None, 'UNDERLINE', 'STRIKETHROUGH']
+    return encode_onehot(text_decoration, categories)
+
+def encode_text_auto_resize(text_auto_resize):
+    # changing the order of the categories will break the model
+    categories = [None, 'HEIGHT', 'WIDTH_AND_HEIGHT', 'TRUNCATE']
+    return encode_onehot(text_auto_resize, categories)
+
+
+def encode_onehot(value, categories):
+    """
+    Encode a value into a one-hot vector
+    """
     one_hot_vector = np.zeros(len(categories), dtype=int)
-    index = categories.index(_type) if _type in categories else -1
+    index = categories.index(value) if value in categories else -1
     if index != -1:
         one_hot_vector[index] = 1
 
     return one_hot_vector
+
 
 def decode_hex8(hex8):
     """
@@ -45,6 +140,14 @@ def decode_hex8(hex8):
     a = int(hex8[6:8], 16) / 255
 
     return r, g, b, a
-    
+
+def encode_tobinary(value, null=0):
+    if value is None:
+        return null
+    if is_not_empty(value):
+        return 1
+    else:
+        return 0
+
 def is_not_empty(s: str):
     return s and s.strip()

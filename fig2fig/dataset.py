@@ -4,7 +4,7 @@ import sqlite3
 from pathlib import Path
 import torch
 from torch.utils.data import Dataset
-from .data_processing.encoders import normalize_type, encode_type, decode_hex8, is_not_empty
+from .data_processing.encoders import encode_font_family, encode_font_style, encode_font_weight, encode_text_align, encode_text_align_vertical, encode_text_auto_resize, encode_text_decoration, encode_type, decode_hex8, encode_tobinary
 
 target_features = [
     'type', # one-hot
@@ -110,7 +110,7 @@ class FigmaNodesDataset(Dataset):
 
         container_features = (
             node["opacity"],
-            is_not_empty(node.get("background_image")),
+            encode_tobinary(node.get("background_image")),
             (
               *decode_hex8(node["border_color"]),
             )
@@ -120,14 +120,14 @@ class FigmaNodesDataset(Dataset):
             node.get("opacity"),
             node.get("n_characters"),
             node.get("font_size"),
-            node.get("font_weight"),
-            node.get("text_align"),
-            node.get("text_align_vertical"),
-            node.get("font_family"),
-            node.get("font_style"),
-            node.get("text_decoration"),
+            encode_font_weight(node.get("font_weight")),
+            encode_text_align(node.get("text_align")),
+            encode_text_align_vertical(node.get("text_align_vertical")),
+            encode_font_family(node.get("font_family")),
+            encode_font_style(node.get("font_style")),
+            encode_text_decoration(node.get("text_decoration")),
+            encode_text_auto_resize(node.get("text_auto_resize")),
             node.get("letter_spacing"),
-            node.get("text_auto_resize"),
             (
               *decode_hex8(node.get("color")),
             )
@@ -182,16 +182,16 @@ class FigmaNodesDataset(Dataset):
         )
 
         _is_mask = (
-            is_not_empty(node.get("is_mask")),
+            encode_tobinary(node.get("is_mask")),
         )
 
         _export_settings = (
             # TODO: use one-hot encoding (BITMAP / VECTOR)
-            is_not_empty(node.get("export_settings")),
+            encode_tobinary(node.get("export_settings")),
         )
 
         # Encode one-hot features
-        type_encoded = encode_type(normalize_type(node["type"]))
+        type_encoded = encode_type(node["type"])
 
         # TODO: Encode other one-hot features and add them to their corresponding channels
 
@@ -229,7 +229,7 @@ class FigmaNodesDataset(Dataset):
         # input parameters
         root_width = row["width"]
         root_height = row["height"]
-        root_type = encode_type(normalize_type(row["type"]))
+        root_type = encode_type(row["type"])
 
 
         # Extract features
