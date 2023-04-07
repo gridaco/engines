@@ -118,6 +118,72 @@ def encode_text_auto_resize(text_auto_resize):
     return encode_onehot(text_auto_resize, categories)
 
 
+def encode_border_alignment(border_alignment):
+    # strokeAlign
+    # changing the order of the categories will break the model
+    categories = [None, 'INSIDE', 'CENTER', 'OUTSIDE']
+    return encode_onehot(border_alignment, categories)
+
+
+def encode_constraint_vertical(constraint_vertical):
+    # https://www.figma.com/developers/api#layoutconstraint-type
+    # changing the order of the categories will break the model
+    categories = [None, 'TOP', 'BOTTOM', 'CENTER', 'TOP_BOTTOM', 'SCALE']
+    return encode_onehot(constraint_vertical, categories)
+
+def encode_constraint_horizontal(constraint_horizontal):
+    # https://www.figma.com/developers/api#layoutconstraint-type
+    # changing the order of the categories will break the model
+    categories = [None, 'LEFT', 'RIGHT', 'CENTER', 'LEFT_RIGHT', 'SCALE']
+    return encode_onehot(constraint_horizontal, categories)
+
+def encode_layout_align(layout_align):
+    # changing the order of the categories will break the model
+    categories = [
+        None, 
+        # current
+        'INHERIT', 'STRETCH',
+        # legacy
+        'MIN', 'MAX', 'CENTER', 'STRETCH'
+    ]
+    return encode_onehot(layout_align, categories)
+
+def encode_layout_mode(layout_mode):
+    # changing the order of the categories will break the model
+    categories = [None, 'NONE', 'HORIZONTAL', 'VERTICAL']
+    return encode_onehot(layout_mode, categories)
+
+def encode_layout_positioning(layout_positioning):
+    # changing the order of the categories will break the model
+    categories = [None, 'AUTO', 'ABSOLUTE']
+    return encode_onehot(layout_positioning, categories)
+
+def encode_layout_grow(layout_grow):
+    # changing the order of the categories will break the model
+    categories = [None, 0, 1]
+    return encode_onehot(layout_grow, categories)
+
+def encode_primary_axis_sizing_mode(primary_axis_sizing_mode):
+    # changing the order of the categories will break the model
+    categories = [None, 'FIXED', 'AUTO']
+    return encode_onehot(primary_axis_sizing_mode, categories)
+
+def encode_counter_axis_sizing_mode(counter_axis_sizing_mode):
+    # changing the order of the categories will break the model
+    categories = [None, 'FIXED', 'AUTO']
+    return encode_onehot(counter_axis_sizing_mode, categories)
+
+def encode_primary_axis_align_items(primary_axis_align_items):
+    # changing the order of the categories will break the model
+    categories = [None, 'MIN', 'CENTER', 'MAX', 'SPACE_BETWEEN']
+    return encode_onehot(primary_axis_align_items, categories)
+
+def encode_counter_axis_align_items(counter_axis_align_items):
+    # changing the order of the categories will break the model
+    categories = [None, 'MIN', 'CENTER', 'MAX', 'BASELINE']
+    return encode_onehot(counter_axis_align_items, categories)
+
+
 def encode_onehot(value, categories):
     """
     Encode a value into a one-hot vector
@@ -141,13 +207,37 @@ def decode_hex8(hex8):
 
     return r, g, b, a
 
+
+def encode_is_boolean(_is):
+    return encode_tobinary(_is, null=0)
+
 def encode_tobinary(value, null=0):
     if value is None:
         return null
-    if is_not_empty(value):
-        return 1
-    else:
-        return 0
+    
+    if type(value) == bool:
+        return int(value)
+    
+    if type(value) == str:
+        if value == '1':
+            return 1
+        elif value == '0':
+            return 0
+        else:
+          if is_not_empty(value):
+              return 1
+          else:
+              return 0
+    
+    if type(value) == int:
+        if value == 1:
+            return 1
+        elif value == 0:
+            return 0
+        else:
+            return 0
+    
+    return null
 
 def is_not_empty(s: str):
     return s and s.strip()

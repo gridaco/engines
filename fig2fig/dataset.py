@@ -4,7 +4,7 @@ import sqlite3
 from pathlib import Path
 import torch
 from torch.utils.data import Dataset
-from .data_processing.encoders import encode_font_family, encode_font_style, encode_font_weight, encode_text_align, encode_text_align_vertical, encode_text_auto_resize, encode_text_decoration, encode_type, decode_hex8, encode_tobinary
+from .data_processing.encoders import encode_border_alignment, encode_constraint_horizontal, encode_constraint_vertical, encode_counter_axis_align_items, encode_counter_axis_sizing_mode, encode_export_settings, encode_font_family, encode_font_style, encode_font_weight, encode_layout_align, encode_layout_grow, encode_layout_mode, encode_layout_positioning, encode_primary_axis_align_items, encode_primary_axis_sizing_mode, encode_text_align, encode_text_align_vertical, encode_text_auto_resize, encode_text_decoration, encode_type, decode_hex8, encode_tobinary, encode_is_boolean
 
 target_features = [
     'type', # one-hot
@@ -30,7 +30,7 @@ target_features = [
     'text_auto_resize', # one-hot
     'letter_spacing', # float
 
-    'stroke_linecap', # one-hot
+    # 'stroke_linecap', # one-hot (not used)
     'border_alignment', # one-hot
     'border_width', # float
     'border_color', # hex8 -> 4 floats (0-1)
@@ -62,7 +62,7 @@ target_features = [
 
     'is_mask', # one-hot
     'export_settings', # one-hot
-    'mix_blend_mode', # one-hot
+    # 'mix_blend_mode', # one-hot (not used)
     'aspect_ratio', # float
     # ...
 ]
@@ -134,20 +134,20 @@ class FigmaNodesDataset(Dataset):
         )
 
         layout_constraint_features = (
-            node.get("constraint_vertical"),
-            node.get("constraint_horizontal"),
+            encode_constraint_vertical(node.get("constraint_vertical")),
+            encode_constraint_horizontal(node.get("constraint_horizontal")),
         )
 
         layout_flex_features = (
-            node.get("layout_align"),
-            node.get("layout_mode"),
-            node.get("layout_positioning"),
-            node.get("layout_grow"),
-            node.get("primary_axis_sizing_mode"),
-            node.get("counter_axis_sizing_mode"),
-            node.get("primary_axis_align_items"),
-            node.get("counter_axis_align_items"),
-            node.get("reverse"),
+            encode_layout_align(node.get("layout_align")),
+            encode_layout_mode(node.get("layout_mode")),
+            encode_layout_positioning(node.get("layout_positioning")),
+            encode_layout_grow(node.get("layout_grow")),
+            encode_primary_axis_sizing_mode(node.get("primary_axis_sizing_mode")),
+            encode_counter_axis_sizing_mode(node.get("counter_axis_sizing_mode")),
+            encode_primary_axis_align_items(node.get("primary_axis_align_items")),
+            encode_counter_axis_align_items(node.get("counter_axis_align_items")),
+            encode_is_boolean(node.get("reverse")),
         )
 
         layout_padding_features = (
@@ -162,7 +162,7 @@ class FigmaNodesDataset(Dataset):
         )
 
         border_features = (
-            node.get("border_alignment"),
+            encode_border_alignment(node.get("border_alignment")),
             node.get("border_width"),
             node.get("border_radius"),
             (
@@ -182,12 +182,11 @@ class FigmaNodesDataset(Dataset):
         )
 
         _is_mask = (
-            encode_tobinary(node.get("is_mask")),
+            encode_is_boolean(node.get("is_mask")),
         )
 
         _export_settings = (
-            # TODO: use one-hot encoding (BITMAP / VECTOR)
-            encode_tobinary(node.get("export_settings")),
+            encode_export_settings(node.get("export_settings")),
         )
 
         # Encode one-hot features
