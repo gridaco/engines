@@ -227,9 +227,14 @@ class FigmaNodesDataset(Dataset):
         if row is None:
             raise IndexError(f"Index {idx} out of range")
 
-        # Extract features and children
+        # input parameters
+        root_width = row["width"]
+        root_height = row["height"]
+        root_type = encode_type(normalize_type(row["type"]))
+
+
+        # Extract features
         features = self.extract_features_recursive(row)
-        children = json.loads(row["children"])
 
         num_channels = len(features)
         num_features = max(len(channel) for channel in features)
@@ -239,7 +244,7 @@ class FigmaNodesDataset(Dataset):
         for i, channel in enumerate(features):
             tensor_features[i, :len(channel)] = torch.tensor(channel, dtype=torch.float32)
 
-        return tensor_features, children
+        return tensor_features, (root_type,), (root_width, root_height)
 
     def get_input_dim(self):
         sample, _ = self[0]  # Get a sample from the dataset
@@ -250,7 +255,7 @@ def normalize_type(_type):
     """
     Normalize the type of a node
     """
-    # TODO: support image
+
     map = {
         'FRAME': 'CONTAINER',
         'GROUP': 'CONTAINER',

@@ -29,11 +29,11 @@ class VAE(nn.Module):
         eps = torch.randn_like(std)
         return mu + eps * std
 
-    def forward(self, x, wh):
+    def forward(self, x, _type, wh):
         h = self.encoder(x)
         mu, log_var = torch.chunk(h, 2, dim=1)
         z = self.reparameterize(mu, log_var)
-        z = torch.cat((z, wh), dim=1)  # Concatenate width and height with the latent variable
+        z = torch.cat((z, wh, _type), dim=1)  # Concatenate width, height, and root type with the latent variable
         x_recon = self.decoder(z)
         return x_recon, mu, log_var
 
@@ -49,17 +49,17 @@ def train(model, dataloader, device, optimizer, epochs):
     for epoch in range(epochs):
         train_loss = 0
         progress_bar = tqdm(enumerate(dataloader), total=len(dataloader), desc=f"Epoch {epoch + 1}/{epochs}", unit="batch")
-        for batch_idx, (data, _, wh) in progress_bar:
+        for batch_idx, (data, _type, wh) in progress_bar:
             data = data.to(device).float()
-            wh = torch.tensor(wh, device=device, dtype=torch.float32)
+            _type = torch.tensor(_type, device=device, dtype=torch.float32).squeeze(1)  # Convert the _type tuple to a tensor
+            wh = torch.tensor(wh, device=device, dtype=torch.float32).squeeze(1)  # Convert the wh tuple to a tensor and fix the dimensions
             optimizer.zero_grad()
-            recon_batch, mu, log_var = model(data, wh)
+            recon_batch, mu, log_var = model(data, _type, wh)
             loss = vae_loss(recon_batch, data, mu, log_var)
             loss.backward()
             train_loss += loss.item()
             optimizer.step()
             progress_bar.set_description(f"Epoch {epoch + 1}/{epochs}, Loss: {train_loss / (batch_idx + 1)}")
-
 
 # Configuration
 hidden_dim = 512
