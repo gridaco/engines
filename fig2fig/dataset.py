@@ -98,9 +98,76 @@ class FigmaNodesDataset(Dataset):
 
     def __len__(self):
         return self.num_samples
-
+    
     def extract_features_recursive(self, node):
-        features = [node[feature] for feature in target_features]
+        dimension_features = (
+            node["x"], node["y"],
+            node["width"], node["height"],
+            node["depth"],
+            node["rotation"],
+        )
+
+        container_features = (
+            node["opacity"],
+            node["background_image"],
+            (
+              *decode_hex8(node["border_color"]),
+            )
+        )
+
+        text_features = (
+            node["opacity"],
+            node["n_characters"],
+            node["font_size"],
+            node["letter_spacing"],
+            (
+              *decode_hex8(node["color"]),
+            )
+        )
+
+        layout_padding_features = (
+            node["padding_top"],
+            node["padding_left"],
+            node["padding_right"],
+            node["padding_bottom"],
+        )
+
+        layout_gap_features = (
+            node["gap"],
+        )
+
+        border_features = (
+            node["border_width"],
+            node["border_radius"],
+        )
+
+        box_shadow_features = (
+            node["box_shadow_offset_x"],
+            node["box_shadow_offset_y"],
+            node["box_shadow_blur"],
+            node["box_shadow_spread"],
+        )
+
+        other_features = (
+            node["aspect_ratio"],
+        )
+
+        # Encode one-hot features
+        type_encoded = encode_type(normalize_type(node["type"]))
+
+        # TODO: Encode other one-hot features and add them to their corresponding channels
+
+        features = [
+            dimension_features,
+            container_features,
+            border_features,
+            text_features,
+            layout_padding_features,
+            layout_gap_features,
+            box_shadow_features,
+            other_features,
+            type_encoded,
+        ]
 
         # Recurse through children
         children = json.loads(node["children"])
@@ -109,6 +176,7 @@ class FigmaNodesDataset(Dataset):
             features.extend(self.extract_features_recursive(child_row))
 
         return features
+
 
     def __getitem__(self, idx):
         # Get data from the table
@@ -120,7 +188,16 @@ class FigmaNodesDataset(Dataset):
         features = self.extract_features_recursive(row)
         children = json.loads(row["children"])
 
-        return torch.tensor(features, dtype=torch.float32), children
+        num_channels = len(features)
+        num_features = max(len(channel) for channel in features)
+
+        tensor_features = torch.zeros((num_channels, num_features), dtype=torch.float32)
+
+        for i, channel in enumerate(features):
+            tensor_features[i, :len(channel)] = torch.tensor(channel, dtype=torch.float32)
+
+        return tensor_features, children
+
 
 def normalize_type(_type):
     """
