@@ -1,0 +1,8 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "hostRequirements": {
+    "cpus": 16,
+    "memory": "32gb",
+    "storage": "256gb"
+  }
+}
