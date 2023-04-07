@@ -61,7 +61,7 @@ def encode_font_weight(font_weight):
     """
 
     # sometimes the font weight is 950, which is not in the list, so we need to round it.
-    font_weight = str(round(int(font_weight) / 100) * 100)
+    font_weight = str(round(int(font_weight if font_weight else 0) / 100) * 100)
 
     # changing the order of the categories will break the model
     categories = [None, '100', '200', '300', '400', '500', '600', '700', '800', '900']

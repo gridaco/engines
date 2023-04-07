@@ -3,6 +3,7 @@ import click
 import sqlite3
 from pathlib import Path
 import torch
+from tqdm import tqdm
 from torch.utils.data import Dataset
 from data_processing.encoders import encode_border_alignment, encode_constraint_horizontal, encode_constraint_vertical, encode_counter_axis_align_items, encode_counter_axis_sizing_mode, encode_export_settings, encode_font_family, encode_font_style, encode_font_weight, encode_layout_align, encode_layout_grow, encode_layout_mode, encode_layout_positioning, encode_primary_axis_align_items, encode_primary_axis_sizing_mode, encode_text_align, encode_text_align_vertical, encode_text_auto_resize, encode_text_decoration, encode_type, decode_hex8, encode_tobinary, encode_is_boolean, encode_r
 
@@ -87,7 +88,13 @@ class NodesDB:
         if row:
             return dict(zip(self.column_names, row))
         return None
-
+    
+    def get_sample_by_node_id(self, node_id, parent_id):
+        self.cursor.execute(f"SELECT * FROM nodes WHERE node_id='{node_id}' AND parent_id='{parent_id}'")
+        row = self.cursor.fetchone()
+        if row:
+            return dict(zip(self.column_names, row))
+        return None
 
 class FigmaNodesDataset(Dataset):
     def __init__(self, db):
@@ -215,9 +222,9 @@ class FigmaNodesDataset(Dataset):
         ]
 
         # Recurse through children
-        children = json.loads(node["children"]) if node["children"] else []
+        children = safe_loads(node["children"]) if node["children"] else []
         for child_id in children:
-            child_row = self.nodes_db.get_sample(child_id)
+            child_row = self.nodes_db.get_sample_by_node_id(node_id=child_id, parent_id=node["node_id"])
             features.extend(self.extract_features_recursive(child_row))
 
         return features
@@ -252,21 +259,33 @@ class FigmaNodesDataset(Dataset):
         sample, _ = self[0]  # Get a sample from the dataset
         input_dim = sample.numel()  # Calculate the number of elements in the flattened tensor
         return input_dim
+    
+    def save_tensors(self, file, max):
+        sample_data = []
+        for idx in tqdm(range(max) if max else range(self.num_samples)):
+            tensor_features, root_type, dimensions = self[idx]
+            sample_data.append((tensor_features, root_type, dimensions))
+        torch.save(sample_data, file)
+
+def safe_loads(s):
+    try:
+        return json.loads(s.replace("'", "\""))
+    except Exception as e:
+        print(f"Failed to parse: {s}")
+        raise e
 
 
 @click.command()
 @click.argument("db", type=click.Path(exists=True, file_okay=True, dir_okay=False), required=True)
 @click.option("--checkpoint", type=click.Path(file_okay=False), required=False, default='./checkpoints/')
-def main(db, checkpoint):
+@click.option("--max", type=click.INT, required=False, default=None)
+def main(db, checkpoint, max):
     db = Path(db)
     checkpoint = Path(checkpoint)
     dataset = FigmaNodesDataset(db)
 
-    print(dataset)
-
     file = checkpoint / f"{db.stem}.pth"
-
-    torch.save(dataset, file)
+    dataset.save_tensors(file, max=max)
 
 if __name__ == "__main__":
     main()
