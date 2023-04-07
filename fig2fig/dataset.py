@@ -4,7 +4,7 @@ import sqlite3
 from pathlib import Path
 import torch
 from torch.utils.data import Dataset
-from .data_processing.encoders import encode_border_alignment, encode_constraint_horizontal, encode_constraint_vertical, encode_counter_axis_align_items, encode_counter_axis_sizing_mode, encode_export_settings, encode_font_family, encode_font_style, encode_font_weight, encode_layout_align, encode_layout_grow, encode_layout_mode, encode_layout_positioning, encode_primary_axis_align_items, encode_primary_axis_sizing_mode, encode_text_align, encode_text_align_vertical, encode_text_auto_resize, encode_text_decoration, encode_type, decode_hex8, encode_tobinary, encode_is_boolean
+from data_processing.encoders import encode_border_alignment, encode_constraint_horizontal, encode_constraint_vertical, encode_counter_axis_align_items, encode_counter_axis_sizing_mode, encode_export_settings, encode_font_family, encode_font_style, encode_font_weight, encode_layout_align, encode_layout_grow, encode_layout_mode, encode_layout_positioning, encode_primary_axis_align_items, encode_primary_axis_sizing_mode, encode_text_align, encode_text_align_vertical, encode_text_auto_resize, encode_text_decoration, encode_type, decode_hex8, encode_tobinary, encode_is_boolean, encode_r
 
 target_features = [
     'type', # one-hot
@@ -90,7 +90,7 @@ class NodesDB:
 
 
 class FigmaNodesDataset(Dataset):
-    def __init__(self, db, max):
+    def __init__(self, db):
         self.nodes_db = NodesDB(db)
 
         self.num_samples = self.nodes_db.get_sample_count()
@@ -104,34 +104,35 @@ class FigmaNodesDataset(Dataset):
             node["x"], node["y"],
             node["width"], node["height"],
             node["depth"],
-            node['n_children'],
+            node['n_children'] or 0,
             node.get("rotation"),
         )
 
         container_features = (
             node["opacity"],
-            decode_hex8(node.get("background_color")),
             encode_tobinary(node.get("background_image")),
-            (
-              *decode_hex8(node["border_color"]),
-            )
+        )
+
+        background_color_features = (
+            *decode_hex8(node.get("background_color")),
         )
 
         text_features = (
-            node.get("opacity"),
-            node.get("n_characters"),
+            encode_r(node.get("opacity", 1)),
+            encode_r(node.get("n_characters", 0)),
             encode_font_family(node.get("font_family")),
             encode_font_weight(node.get("font_weight")),
-            node.get("font_size"),
+            encode_r(node.get("font_size")),
             encode_font_style(node.get("font_style")),
             encode_text_decoration(node.get("text_decoration")),
             encode_text_align(node.get("text_align")),
             encode_text_align_vertical(node.get("text_align_vertical")),
             encode_text_auto_resize(node.get("text_auto_resize")),
-            node.get("letter_spacing"),
-            (
-              *decode_hex8(node.get("color")),
-            )
+            encode_r(node.get("letter_spacing")),
+        )
+
+        text_container_features = (
+            *decode_hex8(node.get("color")),
         )
 
         layout_constraint_features = (
@@ -152,34 +153,35 @@ class FigmaNodesDataset(Dataset):
         )
 
         layout_padding_features = (
-            node.get("padding_top"),
-            node.get("padding_left"),
-            node.get("padding_right"),
-            node.get("padding_bottom"),
+            encode_r(node.get("padding_top")),
+            encode_r(node.get("padding_left")),
+            encode_r(node.get("padding_right")),
+            encode_r(node.get("padding_bottom")),
         )
 
         layout_gap_features = (
-            node.get("gap"),
+            encode_r(node.get("gap")),
         )
 
         border_features = (
             encode_border_alignment(node.get("border_alignment")),
-            node.get("border_width"),
-            node.get("border_radius"),
-            (
-              *decode_hex8(node.get("border_color")),
-            )
+            encode_r(node.get("border_width")),
+            encode_r(node.get("border_radius")),
+        )
+
+        border_color_features = (
+            *decode_hex8(node.get("border_color")),
         )
 
         box_shadow_features = (
-            node.get("box_shadow_offset_x"),
-            node.get("box_shadow_offset_y"),
-            node.get("box_shadow_blur"),
-            node.get("box_shadow_spread"),
+            encode_r(node.get("box_shadow_offset_x")),
+            encode_r(node.get("box_shadow_offset_y")),
+            encode_r(node.get("box_shadow_blur")),
+            encode_r(node.get("box_shadow_spread")),
         )
 
         _aspect_ratio = (
-            node.get("aspect_ratio"),
+            encode_r(node.get("aspect_ratio")),
         )
 
         _is_mask = (
@@ -193,14 +195,15 @@ class FigmaNodesDataset(Dataset):
         # Encode one-hot features
         type_encoded = encode_type(node["type"])
 
-        # TODO: Encode other one-hot features and add them to their corresponding channels
-
         features = [
-            type_encoded,
+            (type_encoded,),
             dimension_features,
             container_features,
+            background_color_features,
             border_features,
+            border_color_features,
             text_features,
+            text_container_features,
             layout_constraint_features,
             layout_flex_features,
             layout_padding_features,
@@ -212,7 +215,7 @@ class FigmaNodesDataset(Dataset):
         ]
 
         # Recurse through children
-        children = json.loads(node["children"])
+        children = json.loads(node["children"]) if node["children"] else []
         for child_id in children:
             child_row = self.nodes_db.get_sample(child_id)
             features.extend(self.extract_features_recursive(child_row))
@@ -253,20 +256,17 @@ class FigmaNodesDataset(Dataset):
 
 @click.command()
 @click.argument("db", type=click.Path(exists=True, file_okay=True, dir_okay=False), required=True)
-@click.option("--checkpoint", type=click.Path(file_okay=False), required=False, default='.checkpoints/')
+@click.option("--checkpoint", type=click.Path(file_okay=False), required=False, default='./checkpoints/')
 def main(db, checkpoint):
     db = Path(db)
     checkpoint = Path(checkpoint)
     dataset = FigmaNodesDataset(db)
-    features, children = dataset[0]
 
-    print(features)
-    print(children)
+    print(dataset)
 
     file = checkpoint / f"{db.stem}.pth"
 
     torch.save(dataset, file)
-
 
 if __name__ == "__main__":
     main()
