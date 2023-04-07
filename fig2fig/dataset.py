@@ -241,6 +241,10 @@ class FigmaNodesDataset(Dataset):
 
         return tensor_features, children
 
+    def get_input_dim(self):
+        sample, _ = self[0]  # Get a sample from the dataset
+        input_dim = sample.numel()  # Calculate the number of elements in the flattened tensor
+        return input_dim
 
 def normalize_type(_type):
     """
