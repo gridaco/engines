@@ -254,8 +254,6 @@ class FigmaNodesDataset(Dataset):
 @click.command()
 @click.argument("db", type=click.Path(exists=True, file_okay=True, dir_okay=False), required=True)
 @click.option("--checkpoint", type=click.Path(file_okay=False), required=False, default='.checkpoints/')
-@click.option("--max", type=int, required=False, default=None)
-@click.option("--shuffle", type=bool, required=False, default=False)
 def main(db, checkpoint):
     db = Path(db)
     checkpoint = Path(checkpoint)
