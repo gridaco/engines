@@ -75,6 +75,9 @@ class NodesDB:
         self.column_names = self.get_column_names()
         self.max = max
         self.max_depth = max_depth
+    
+    def where(self):
+        return f"depth <= {self.max_depth} AND type == 'FRAME' AND width <= 1920"
 
     def get_column_names(self):
         self.cursor.execute("PRAGMA table_info(nodes)")
@@ -84,12 +87,12 @@ class NodesDB:
         if self.max_depth is None:
             self.cursor.execute("SELECT COUNT(*) FROM nodes")
         else:
-            self.cursor.execute(f"SELECT COUNT(*) FROM nodes WHERE depth <= {self.max_depth}")
+            self.cursor.execute(f"SELECT COUNT(*) FROM nodes WHERE {self.where()}")
         count = self.cursor.fetchone()[0]
         return min(count, self.max) if self.max else count
 
     def get_sample(self, idx):
-        self.cursor.execute(f"SELECT * FROM nodes WHERE depth <= {self.max_depth} LIMIT 1 OFFSET {idx}")
+        self.cursor.execute(f"SELECT * FROM nodes WHERE {self.where()} LIMIT 1 OFFSET {idx}")
         row = self.cursor.fetchone()
         if row:
             return dict(zip(self.column_names, row))
@@ -114,11 +117,11 @@ class FigmaNodesDataset(Dataset):
     
     def extract_features_recursive(self, node: dict):
         dimension_features = (
-            node["x"], node["y"],
-            node["width"], node["height"],
-            node["depth"],
+            encode_r(node["x"]), encode_r(node["y"]),
+            encode_r(node["width"]), encode_r(node["height"]),
+            encode_r(node["depth"]),
             node['n_children'] or 0,
-            node.get("rotation"),
+            encode_r(node.get("rotation", 0)),
         )
 
         container_features = (
@@ -257,7 +260,11 @@ class FigmaNodesDataset(Dataset):
         tensor_features = torch.zeros((num_channels, num_features), dtype=torch.float32)
 
         for i, channel in enumerate(features):
-            tensor_features[i, :len(channel)] = torch.tensor(channel, dtype=torch.float32)
+            try:
+                tensor_features[i, :len(channel)] = torch.tensor(channel, dtype=torch.float32)
+            except Exception as e:
+                print(f"{i} Failed to convert {channel} to tensor")
+                raise e
 
         return tensor_features, (root_type,), (root_width, root_height)
 
@@ -286,7 +293,8 @@ def safe_loads(s):
 @click.option("--checkpoint", type=click.Path(file_okay=False), required=False, default='./checkpoints/')
 @click.option("--max", type=click.INT, required=False, default=None)
 @click.option("--depth", type=click.INT, required=False, default=None)
-def main(db, checkpoint, max, depth):
+@click.option("--skip", type=click.INT, required=False, default=None)
+def main(db, checkpoint, max, depth, skip):
     db = Path(db)
     checkpoint = Path(checkpoint)
     dataset = FigmaNodesDataset(db, max=max, max_depth=depth)
