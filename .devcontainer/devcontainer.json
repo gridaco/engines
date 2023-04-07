@@ -1,8 +1,18 @@
 {
   "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "ms-toolsai.jupyter"]
+    }
+  },
   "hostRequirements": {
     "cpus": 16,
     "memory": "32gb",
     "storage": "256gb"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/nvidia-cuda:1": {
+      "installCudnn": true
+    }
   }
 }
