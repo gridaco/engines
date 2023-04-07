@@ -110,6 +110,7 @@ class FigmaNodesDataset(Dataset):
 
         container_features = (
             node["opacity"],
+            decode_hex8(node.get("background_color")),
             encode_tobinary(node.get("background_image")),
             (
               *decode_hex8(node["border_color"]),
@@ -119,13 +120,13 @@ class FigmaNodesDataset(Dataset):
         text_features = (
             node.get("opacity"),
             node.get("n_characters"),
-            node.get("font_size"),
-            encode_font_weight(node.get("font_weight")),
-            encode_text_align(node.get("text_align")),
-            encode_text_align_vertical(node.get("text_align_vertical")),
             encode_font_family(node.get("font_family")),
+            encode_font_weight(node.get("font_weight")),
+            node.get("font_size"),
             encode_font_style(node.get("font_style")),
             encode_text_decoration(node.get("text_decoration")),
+            encode_text_align(node.get("text_align")),
+            encode_text_align_vertical(node.get("text_align_vertical")),
             encode_text_auto_resize(node.get("text_auto_resize")),
             node.get("letter_spacing"),
             (
