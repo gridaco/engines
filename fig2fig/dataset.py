@@ -36,6 +36,7 @@ target_features = [
     'border_width', # float
     'border_color', # hex8 -> 4 floats (0-1)
     'border_radius', # float
+
     'box_shadow_offset_x', # float
     'box_shadow_offset_y', # float
     'box_shadow_blur', # float
@@ -99,57 +100,95 @@ class FigmaNodesDataset(Dataset):
     def __len__(self):
         return self.num_samples
     
-    def extract_features_recursive(self, node):
+    def extract_features_recursive(self, node: dict):
         dimension_features = (
             node["x"], node["y"],
             node["width"], node["height"],
             node["depth"],
-            node["rotation"],
+            node['n_children'],
+            node.get("rotation"),
         )
 
         container_features = (
             node["opacity"],
-            node["background_image"],
+            is_not_empty(node.get("background_image")),
             (
               *decode_hex8(node["border_color"]),
             )
         )
 
         text_features = (
-            node["opacity"],
-            node["n_characters"],
-            node["font_size"],
-            node["letter_spacing"],
+            node.get("opacity"),
+            node.get("n_characters"),
+            node.get("font_size"),
+            node.get("font_weight"),
+            node.get("text_align"),
+            node.get("text_align_vertical"),
+            node.get("font_family"),
+            node.get("font_style"),
+            node.get("text_decoration"),
+            node.get("letter_spacing"),
+            node.get("text_auto_resize"),
             (
-              *decode_hex8(node["color"]),
+              *decode_hex8(node.get("color")),
             )
         )
 
+        layout_constraint_features = (
+            node.get("constraint_vertical"),
+            node.get("constraint_horizontal"),
+        )
+
+        layout_flex_features = (
+            node.get("layout_align"),
+            node.get("layout_mode"),
+            node.get("layout_positioning"),
+            node.get("layout_grow"),
+            node.get("primary_axis_sizing_mode"),
+            node.get("counter_axis_sizing_mode"),
+            node.get("primary_axis_align_items"),
+            node.get("counter_axis_align_items"),
+            node.get("reverse"),
+        )
+
         layout_padding_features = (
-            node["padding_top"],
-            node["padding_left"],
-            node["padding_right"],
-            node["padding_bottom"],
+            node.get("padding_top"),
+            node.get("padding_left"),
+            node.get("padding_right"),
+            node.get("padding_bottom"),
         )
 
         layout_gap_features = (
-            node["gap"],
+            node.get("gap"),
         )
 
         border_features = (
-            node["border_width"],
-            node["border_radius"],
+            node.get("border_alignment"),
+            node.get("border_width"),
+            node.get("border_radius"),
+            (
+              *decode_hex8(node.get("border_color")),
+            )
         )
 
         box_shadow_features = (
-            node["box_shadow_offset_x"],
-            node["box_shadow_offset_y"],
-            node["box_shadow_blur"],
-            node["box_shadow_spread"],
+            node.get("box_shadow_offset_x"),
+            node.get("box_shadow_offset_y"),
+            node.get("box_shadow_blur"),
+            node.get("box_shadow_spread"),
         )
 
-        other_features = (
-            node["aspect_ratio"],
+        _aspect_ratio = (
+            node.get("aspect_ratio"),
+        )
+
+        _is_mask = (
+            is_not_empty(node.get("is_mask")),
+        )
+
+        _export_settings = (
+            # TODO: use one-hot encoding (BITMAP / VECTOR)
+            is_not_empty(node.get("export_settings")),
         )
 
         # Encode one-hot features
@@ -158,15 +197,19 @@ class FigmaNodesDataset(Dataset):
         # TODO: Encode other one-hot features and add them to their corresponding channels
 
         features = [
+            type_encoded,
             dimension_features,
             container_features,
             border_features,
             text_features,
+            layout_constraint_features,
+            layout_flex_features,
             layout_padding_features,
             layout_gap_features,
             box_shadow_features,
-            other_features,
-            type_encoded,
+            _aspect_ratio,
+            _is_mask,
+            _export_settings,
         ]
 
         # Recurse through children
@@ -244,7 +287,9 @@ def decode_hex8(hex8):
     a = int(hex8[6:8], 16) / 255
 
     return r, g, b, a
-
+    
+def is_not_empty(s: str):
+    return s and s.strip()
 
 @click.command()
 @click.argument("db", type=click.Path(exists=True, file_okay=True, dir_okay=False), required=True)
